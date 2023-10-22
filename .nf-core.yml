@@ -1,0 +1,5 @@
+repository_type: pipeline
+template:
+  author: barbarahelena
+  description: vsearch pipeline for 16s microbiota data
+  name: vsearchpipeline

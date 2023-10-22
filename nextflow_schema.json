@@ -284,5 +284,15 @@
         {
             "$ref": "#/definitions/generic_options"
         }
-    ]
+    ],
+    "properties": {
+        "fwd_primer": {
+            "type": "string",
+            "default": "CCTACGGGAGGCAGCAG"
+        },
+        "rev_primer": {
+            "type": "string",
+            "default": "TACNVGGGTATCTAAKCC"
+        }
+    }
 }

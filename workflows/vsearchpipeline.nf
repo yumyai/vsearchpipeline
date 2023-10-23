@@ -39,6 +39,10 @@ include { SEQTK_TRIMFQ } from '../modules/local/seqtk/trimfq'
 include { VSEARCH_FASTQMERGEPAIRS } from '../modules/local/vsearch/fastqmergepairs'
 include { VSEARCH_FASTQFILTER } from '../modules/local/vsearch/fastqfilter'
 include { VSEARCH_DEREPFULLLENGTH } from '../modules/local/vsearch/derepfulllength'
+include { VSEARCH_DEREPFULLLENGTHALL } from '../modules/local/vsearch/derepfulllengthall'
+include { VSEARCH_CLUSTERUNOISE } from '../modules/local/vsearch/clusterunoise'
+include { VSEARCH_UCHIMEDENOVO } from '../modules/local/vsearch/uchimedenovo'
+include { VSEARCH_USEARCHGLOBAL } from '../modules/local/vsearch/usearchglobal'
 
 
 //
@@ -115,9 +119,28 @@ workflow VSEARCHPIPELINE {
     )
 
     //
-    // Module: concatenate samples and call ASVs
+    // Module: concatenate samples and dereplicate again
     //
-    VSEARCH_DEREPFULLLENGTH.out.reads.view()
+
+    fasta_files = VSEARCH_DEREPFULLLENGTH.out.reads
+                        .collect { it[1] }
+
+    VSEARCH_DEREPFULLLENGTHALL (
+        fasta_files
+    )
+
+    VSEARCH_CLUSTERUNOISE (
+        VSEARCH_DEREPFULLLENGTHALL.out.reads
+    )
+
+    VSEARCH_UCHIMEDENOVO (
+        VSEARCH_CLUSTERUNOISE.out.asvs
+    )
+
+    VSEARCH_USEARCHGLOBAL (
+        VSEARCH_DEREPFULLLENGTHALL.out.concatreads,
+        VSEARCH_UCHIMEDENOVO.out.asvs
+    )
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')

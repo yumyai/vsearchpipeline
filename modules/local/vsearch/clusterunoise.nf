@@ -1,5 +1,4 @@
-process VSEARCH_DEREPFULLLENGTH {
-    tag "$meta.id"
+process VSEARCH_CLUSTERUNOISE {
     label 'process_single'
     conda "bioconda::vsearch=2.23.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -7,27 +6,23 @@ process VSEARCH_DEREPFULLLENGTH {
         'biocontainers/vsearch:2.23.0--h6a68c12_0' }"
 
     input:
-    tuple val(meta), path(reads)
+    path(reads)
 
     output:
-    tuple val(meta), path("*.derep.fasta")     , emit: reads
-    path "versions.yml"                        , emit: versions
+    path "asvs.clustered.fasta"      , emit: asvs
+    path "versions.yml"             , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    def uniq = "${prefix}.derep.fasta"
     """
     vsearch \\
-        --derep_fulllength $reads \\
-        --output $uniq \\
-        --strand plus \\
-        --sizeout \\
-        --fasta_width 0 \\
-        --relabel Uniq
+        --cluster_unoise $reads \\
+        --centroids asvs.clustered.fasta \\
+        --minsize 8 \\
+        --unoise_alpha 2
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -37,10 +32,8 @@ process VSEARCH_DEREPFULLLENGTH {
 
     stub:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    def uniq = "${prefix}.derep.fasta"
     """
-    touch $uniq
+    touch asvs.clustered.fasta
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

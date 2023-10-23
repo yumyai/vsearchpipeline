@@ -38,6 +38,8 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 include { SEQTK_TRIMFQ } from '../modules/local/seqtk/trimfq'
 include { VSEARCH_FASTQMERGEPAIRS } from '../modules/local/vsearch/fastqmergepairs'
 include { VSEARCH_FASTQFILTER } from '../modules/local/vsearch/fastqfilter'
+include { VSEARCH_DEREPFULLLENGTH } from '../modules/local/vsearch/derepfulllength'
+
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -97,7 +99,7 @@ workflow VSEARCHPIPELINE {
     )
 
     //
-    // MODULE: Run VSEARCH 
+    // MODULE: Run VSEARCH on seperate samples
     //
 
     VSEARCH_FASTQMERGEPAIRS (
@@ -107,6 +109,15 @@ workflow VSEARCHPIPELINE {
     VSEARCH_FASTQFILTER (
         VSEARCH_FASTQMERGEPAIRS.out.reads
     )
+
+    VSEARCH_DEREPFULLLENGTH (
+        VSEARCH_FASTQFILTER.out.reads
+    )
+
+    //
+    // Module: concatenate samples and call ASVs
+    //
+    VSEARCH_DEREPFULLLENGTH.out.reads.view()
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')

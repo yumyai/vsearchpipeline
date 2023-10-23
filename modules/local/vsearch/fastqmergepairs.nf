@@ -23,9 +23,9 @@ process VSEARCH_FASTQMERGEPAIRS {
     def rev_reads = reads[1]
     def merged = "${prefix}.merged.fastq.gz"
 
-    //         # --fastq_minmergelen 230 \\
-    //    # --fastq_maxmergelen 270 \\
-    //    # --fastq_eeout \\
+    //    --fastq_minmergelen 230 \\
+    //    --fastq_maxmergelen 270 \\
+    //    --fastq_eeout \\
 
     """
     vsearch \\

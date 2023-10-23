@@ -36,6 +36,8 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 // MODULE: Local modules
 //
 include { SEQTK_TRIMFQ } from '../modules/local/seqtk/trimfq'
+include { VSEARCH_FASTQMERGEPAIRS } from '../modules/local/vsearch/fastqmergepairs'
+include { VSEARCH_FASTQFILTER } from '../modules/local/vsearch/fastqfilter'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -75,21 +77,35 @@ workflow VSEARCHPIPELINE {
         file(params.input)
     )
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
-    // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
-    // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
-    // ! There is currently no tooling to help you write a sample sheet schema
+   
     //
     // MODULE: Run FastQC
     //
+
     FASTQC (
         INPUT_CHECK.out.reads
     )
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
 
+    //
+    // MODULE: Run Seqtk trimfq
+    //
 
     SEQTK_TRIMFQ (
         INPUT_CHECK.out.reads, 
         tuple(params.fwd_primer, params.rev_primer)
+    )
+
+    //
+    // MODULE: Run VSEARCH 
+    //
+
+    VSEARCH_FASTQMERGEPAIRS (
+        SEQTK_TRIMFQ.out.reads
+    )
+
+    VSEARCH_FASTQFILTER (
+        VSEARCH_FASTQMERGEPAIRS.out.reads
     )
 
     CUSTOM_DUMPSOFTWAREVERSIONS (

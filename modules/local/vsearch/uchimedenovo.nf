@@ -22,7 +22,8 @@ process VSEARCH_UCHIMEDENOVO {
     vsearch \\
         --uchime3_denovo $reads \\
         --chimeras chimeras.fasta \\
-        --nonchimeras asvs_nonchimeras.fasta
+        --nonchimeras asvs_nonchimeras.fasta \\
+        --relabel ASV_
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

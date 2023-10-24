@@ -35,15 +35,18 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 // MODULE: Local modules
 //
-include { SEQTK_TRIMFQ } from '../modules/local/seqtk/trimfq'
-include { VSEARCH_FASTQMERGEPAIRS } from '../modules/local/vsearch/fastqmergepairs'
-include { VSEARCH_FASTQFILTER } from '../modules/local/vsearch/fastqfilter'
-include { VSEARCH_DEREPFULLLENGTH } from '../modules/local/vsearch/derepfulllength'
-include { VSEARCH_DEREPFULLLENGTHALL } from '../modules/local/vsearch/derepfulllengthall'
-include { VSEARCH_CLUSTERUNOISE } from '../modules/local/vsearch/clusterunoise'
-include { VSEARCH_UCHIMEDENOVO } from '../modules/local/vsearch/uchimedenovo'
-include { VSEARCH_USEARCHGLOBAL } from '../modules/local/vsearch/usearchglobal'
-
+include { SEQTK_TRIMFQ }                from '../modules/local/seqtk/trimfq'
+include { VSEARCH_FASTQMERGEPAIRS }     from '../modules/local/vsearch/fastqmergepairs'
+include { VSEARCH_FASTQFILTER }         from '../modules/local/vsearch/fastqfilter'
+include { VSEARCH_DEREPFULLLENGTH }     from '../modules/local/vsearch/derepfulllength'
+include { VSEARCH_DEREPFULLLENGTHALL }  from '../modules/local/vsearch/derepfulllengthall'
+include { VSEARCH_CLUSTERUNOISE }       from '../modules/local/vsearch/clusterunoise'
+include { VSEARCH_UCHIMEDENOVO }        from '../modules/local/vsearch/uchimedenovo'
+include { VSEARCH_USEARCHGLOBAL }       from '../modules/local/vsearch/usearchglobal'
+include { MAFFT }                       from '../modules/local/mafft'
+include { VERYFASTTREE }                from '../modules/local/veryfasttree'
+include { SILVADATABASES }              from '../modules/local/silvadatabases'
+include { DADA2_ASSIGNTAXONOMY }              from '../modules/local/dada2/assigntaxonomy'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -103,7 +106,7 @@ workflow VSEARCHPIPELINE {
     )
 
     //
-    // MODULE: Run VSEARCH on seperate samples
+    // MODULE: Run VSEARCH on separate samples
     //
 
     VSEARCH_FASTQMERGEPAIRS (
@@ -123,7 +126,7 @@ workflow VSEARCHPIPELINE {
     //
 
     fasta_files = VSEARCH_DEREPFULLLENGTH.out.reads
-                        .collect { it[1] }
+        .collect { it[1] }
 
     VSEARCH_DEREPFULLLENGTHALL (
         fasta_files
@@ -140,6 +143,35 @@ workflow VSEARCHPIPELINE {
     VSEARCH_USEARCHGLOBAL (
         VSEARCH_DEREPFULLLENGTHALL.out.concatreads,
         VSEARCH_UCHIMEDENOVO.out.asvs
+    )
+
+    MAFFT (
+        VSEARCH_UCHIMEDENOVO.out.asvs
+    )
+
+    VERYFASTTREE (
+        MAFFT.out.msa
+    )
+
+    // if(!(file("$storeDir/SILVA_asv_db.fa.gz", checkIfExists = true)|
+    //         file("$storeDir/SILVA_species_db.fa.gz", checkIfExists = true)){
+    //             SILVADATABASES()
+    //             ch_silva_database = SILVADATABASES.out.asv
+    //             ch_silva_species_database = SILVADATABASES.out.species
+    // } else{
+    //     ch_silva_database = Channel.fromPath("$storeDir/SILVA_asv_db.fa.gz")
+    //     ch_silva_species_database = Channel.fromPath("$storeDir/SILVA_species_db.fa.gz")
+    // }
+
+    SILVADATABASES()
+
+    // ch_asvdb = Channel.fromPath('SILVA_asv_db.fa.gz', checkIfExists = true)
+    // ch_speciesdb = Channel.fromPath('db/')
+    
+    DADA2_ASSIGNTAXONOMY (
+        VSEARCH_UCHIMEDENOVO.out.asvs,
+        SILVADATABASES.out.asvdb,
+        SILVADATABASES.out.speciesdb
     )
 
     CUSTOM_DUMPSOFTWAREVERSIONS (

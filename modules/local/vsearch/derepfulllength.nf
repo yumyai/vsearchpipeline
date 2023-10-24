@@ -27,7 +27,7 @@ process VSEARCH_DEREPFULLLENGTH {
         --strand plus \\
         --sizeout \\
         --fasta_width 0 \\
-        --relabel Uniq
+        --relabel $prefix.
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

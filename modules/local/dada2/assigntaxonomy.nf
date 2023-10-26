@@ -13,8 +13,8 @@ process DADA2_ASSIGNTAXONOMY {
     path silva_species_db
 
     output:
-    path "taxtable.csv"         , emit: taxtable
-    //path "versions.yml"         , emit: versions
+    path "taxtable.csv"             , emit: taxtable
+    //path "versions.yml"           , emit: versions
 
     when:
     task.ext.when == null || task.ext.when

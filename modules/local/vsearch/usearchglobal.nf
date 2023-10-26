@@ -10,8 +10,8 @@ process VSEARCH_USEARCHGLOBAL {
     path(asvs)
     
     output:
-    path "asv_counts.txt"          , emit: asvs
-    path "versions.yml"            , emit: versions
+    path "count_table.txt"          , emit: counts
+    path "versions.yml"             , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -23,7 +23,7 @@ process VSEARCH_USEARCHGLOBAL {
         --usearch_global $allreads \\
         --db $asvs \\
         --id 0.97 \\
-        --otutabout asv_counts.txt
+        --otutabout count_table.txt
     
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -12,12 +12,8 @@ class WorkflowVsearchpipeline {
     //
     public static void initialise(params, log) {
 
-        genomeExistsError(params, log)
+        // here you can add checks for mandatory parameters
 
-
-        if (!params.fasta) {
-            Nextflow.error "Genome fasta file not specified with e.g. '--fasta genome.fa' or via a detectable config file."
-        }
     }
 
     //
@@ -106,17 +102,4 @@ class WorkflowVsearchpipeline {
         return description_html
     }
 
-    //
-    // Exit pipeline if incorrect --genome key provided
-    //
-    private static void genomeExistsError(params, log) {
-        if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
-            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
-                "  Currently, the available genome keys are:\n" +
-                "  ${params.genomes.keySet().join(", ")}\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            Nextflow.error(error_string)
-        }
-    }
 }

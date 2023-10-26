@@ -46,7 +46,8 @@ include { VSEARCH_USEARCHGLOBAL }       from '../modules/local/vsearch/usearchgl
 include { MAFFT }                       from '../modules/local/mafft'
 include { VERYFASTTREE }                from '../modules/local/veryfasttree'
 include { SILVADATABASES }              from '../modules/local/silvadatabases'
-include { DADA2_ASSIGNTAXONOMY }              from '../modules/local/dada2/assigntaxonomy'
+include { DADA2_ASSIGNTAXONOMY }        from '../modules/local/dada2/assigntaxonomy'
+include { PHYLOSEQ }                    from '../modules/local/phyloseq'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -121,10 +122,6 @@ workflow VSEARCHPIPELINE {
         VSEARCH_FASTQFILTER.out.reads
     )
 
-    //
-    // Module: concatenate samples and dereplicate again
-    //
-
     fasta_files = VSEARCH_DEREPFULLLENGTH.out.reads
         .collect { it[1] }
 
@@ -153,25 +150,19 @@ workflow VSEARCHPIPELINE {
         MAFFT.out.msa
     )
 
-    // if(!(file("$storeDir/SILVA_asv_db.fa.gz", checkIfExists = true)|
-    //         file("$storeDir/SILVA_species_db.fa.gz", checkIfExists = true)){
-    //             SILVADATABASES()
-    //             ch_silva_database = SILVADATABASES.out.asv
-    //             ch_silva_species_database = SILVADATABASES.out.species
-    // } else{
-    //     ch_silva_database = Channel.fromPath("$storeDir/SILVA_asv_db.fa.gz")
-    //     ch_silva_species_database = Channel.fromPath("$storeDir/SILVA_species_db.fa.gz")
-    // }
-
     SILVADATABASES()
-
-    // ch_asvdb = Channel.fromPath('SILVA_asv_db.fa.gz', checkIfExists = true)
-    // ch_speciesdb = Channel.fromPath('db/')
     
     DADA2_ASSIGNTAXONOMY (
         VSEARCH_UCHIMEDENOVO.out.asvs,
         SILVADATABASES.out.asvdb,
         SILVADATABASES.out.speciesdb
+    )
+
+    PHYLOSEQ (
+        VSEARCH_UCHIMEDENOVO.out.asvs,
+        VSEARCH_USEARCHGLOBAL.out.counts,
+        VERYFASTTREE.out.tree,
+        DADA2_ASSIGNTAXONOMY.out.taxtable
     )
 
     CUSTOM_DUMPSOFTWAREVERSIONS (

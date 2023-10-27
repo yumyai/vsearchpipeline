@@ -9,7 +9,7 @@ process SEQTK_TRIMFQ {
 
     input:
     tuple val(meta), path(reads)
-    tuple val(fwd_primer), val(rev_primer)
+    val primers
 
     output:
     tuple val(meta), path("*.trim.fastq.gz") , emit: reads
@@ -18,8 +18,8 @@ process SEQTK_TRIMFQ {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def fwd_chars = fwd_primer.size()
-    def rev_chars = rev_primer.size()
+    def fwd_chars = primers.forward.size()
+    def rev_chars = primers.reverse.size()
     def fwd_reads = reads[0]
     def rev_reads = reads[1]
     def fwd_trimmed = "${prefix}_1.trim.fastq.gz"

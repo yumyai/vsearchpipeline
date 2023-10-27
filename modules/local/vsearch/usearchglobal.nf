@@ -18,6 +18,7 @@ process VSEARCH_USEARCHGLOBAL {
 
     script:
     def args = task.ext.args ?: ''
+
     """
     vsearch \\
         --usearch_global $allreads \\

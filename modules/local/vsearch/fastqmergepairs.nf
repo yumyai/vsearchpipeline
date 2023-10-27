@@ -8,6 +8,10 @@ process VSEARCH_FASTQMERGEPAIRS {
 
     input:
     tuple val(meta), path(reads)
+    val allowmergestagger
+    val maxdiffs
+    val minlength
+    val maxlength
 
     output:
     tuple val(meta), path("*.merged.fastq.gz")  , emit: reads
@@ -22,19 +26,21 @@ process VSEARCH_FASTQMERGEPAIRS {
     def fwd_reads = reads[0]
     def rev_reads = reads[1]
     def merged = "${prefix}.merged.fastq.gz"
-
-    //    --fastq_minmergelen 230 \\
-    //    --fastq_maxmergelen 270 \\
-    //    --fastq_eeout \\
+    def allowmergestagger = allowmergestagger ? "--fastq_allowmergestagger" : ''
+    def maxdiffs = maxdiffs ? "--fastq_maxdiffs ${maxdiffs}" : ''
+    def minmerge = minlength ? "--fastq_minmergelen ${minlength}" : ''
+    def maxmerge = maxlength ? "--fastq_maxmergelen ${maxlength}" : ''
 
     """
     vsearch \\
-        --fastq_mergepairs $fwd_reads \\
-        --reverse $rev_reads \\
-        --fastq_maxdiffs 100 \\
+        --fastq_mergepairs ${fwd_reads} \\
+        --reverse ${rev_reads} \\
+        ${maxdiffs} \\
+        ${allowmergestagger} \\
+        ${minmerge} \\
+        ${maxmerge} \\
         --fastq_allowmergestagger \\
-        --fastqout $merged
-        
+        --fastqout ${merged}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -48,8 +54,12 @@ process VSEARCH_FASTQMERGEPAIRS {
     def fwd_reads = reads[0]
     def rev_reads = reads[1]
     def merged = "${prefix}.merged.fastq.gz"
+    def allowmergestagger = stagger ? "--fastq_allowmergestagger" : ''
+    def maxdiffs = $maxdiffs ? "--fastq_maxdiffs ${maxdiffs}" : ''
+    def minmerge = $minlength ? "--fastq_minmergelen ${minlength}" : ''
+    def maxmerge = $maxlength ? "--fastq_maxmergelen ${maxlength}" : ''
     """
-    touch $merged
+    touch ${merged}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

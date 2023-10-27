@@ -252,13 +252,29 @@
         }
     ],
     "properties": {
-        "fwd_primer": {
+        "without_primers": {
             "type": "string",
-            "default": "CCTACGGGAGGCAGCAG"
+            "default": "false"
         },
-        "rev_primer": {
+        "primers": {
             "type": "string",
-            "default": "TACNVGGGTATCTAAKCC"
+            "default": null
+        },
+        "allowmergestagger": {
+            "type": "string",
+            "default": "false"
+        },
+        "maxdiffs": {
+            "type": "integer",
+            "default": 30
+        },
+        "minlength": {
+            "type": "string",
+            "default": null
+        },
+        "maxlength": {
+            "type": "string",
+            "default": null
         }
     }
 }

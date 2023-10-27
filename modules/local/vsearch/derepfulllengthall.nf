@@ -22,7 +22,7 @@ process VSEARCH_DEREPFULLLENGTHALL {
 
     """
     cat $reads > all.concat.fasta
-       
+    
     vsearch \\
         --derep_fulllength all.concat.fasta\\
         --output all.derep.fasta \\

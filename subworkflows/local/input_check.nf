@@ -3,10 +3,12 @@
 //
 
 include { SAMPLESHEET_CHECK } from '../../modules/local/samplesheet_check'
+include { PRIMERSHEET_CHECK } from '../../modules/local/primersheet_check'
 
 workflow INPUT_CHECK {
     take:
     samplesheet // file: /path/to/samplesheet.csv
+    primersheet
 
     main:
     SAMPLESHEET_CHECK ( samplesheet )
@@ -14,9 +16,16 @@ workflow INPUT_CHECK {
         .splitCsv ( header:true, sep:',' )
         .map { create_fastq_channel(it) }
         .set { reads }
+    
+    PRIMERSHEET_CHECK ( primersheet )
+        .csv
+        .splitCsv ( header:true, sep:',' )
+        .map { create_primer_channel(it) }
+        .set { primers }
 
     emit:
     reads                                     // channel: [ val(meta), [ reads ] ]
+    primers                                   // channel: [ forward_primer, reverse_primer ]
     versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
 }
 
@@ -41,4 +50,12 @@ def create_fastq_channel(LinkedHashMap row) {
         fastq_meta = [ meta, [ file(row.fastq_1), file(row.fastq_2) ] ]
     }
     return fastq_meta
+}
+
+def create_primer_channel(LinkedHashMap row) {
+    def primer = [:]
+    primer.forward         = row.forward_primer
+    primer.reverse         = row.reverse_primer
+
+    return primer
 }

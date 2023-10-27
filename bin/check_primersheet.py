@@ -1,179 +1,63 @@
 #!/usr/bin/env python
-import argparse
-import csv
-import logging
+import pandas as pd
+import re
 import sys
-from pathlib import Path
 
-logger = logging.getLogger()
+def is_valid_sequence(sequence):
+    # Check if the input is a valid DNA sequence, including all IUPAC degenerate bases
+    return bool(re.match(r'^[ACGTURYSWKMBDHVNacgturyswkm­­bdhvn]*$', sequence))
 
-class RowChecker:
-    """
-    Define a service that can validate and transform each given row.
+def check_and_normalize_column_names(df):
+    # Remove leading and trailing spaces from column names
+    df.columns = df.columns.str.strip()
+    # Check if column names are 'fwd_primer' and 'rev_primer'
+    if 'fwd_primer' in df.columns and 'rev_primer' in df.columns:
+        df = df.rename(columns={'fwd_primer': 'forward_primer', 'rev_primer': 'reverse_primer'})
+    return df
 
-    Attributes:
-        modified (list): A list of dicts, where each dict corresponds to a previously
-            validated and transformed row. The order of rows is maintained.
+def check_primersheet(filename, output_filename):
+    try:
+        # Load the CSV file into a DataFrame
+        primersheet = pd.read_csv(filename)
 
-    """
+        # Debug: Print the column names
+        print("Column names:", primersheet.columns)
 
-    def __init__(
-        self,
-        first_col="forward_primer",
-        second_col="reverse_primer",
-        **kwargs,
-    ):
-        """
-        Initialize the row checker with the expected column names.
+        # Check and normalize column names
+        primersheet = check_and_normalize_column_names(primersheet)
 
-        Args:
-            first_col (str): 
-            second_col (str): 
+        # Check if the DataFrame has only one row
+        if primersheet.shape[0] != 1:
+            return False, "The primersheet should have only one row."
 
-        """
-        super().__init__(**kwargs)
-        self._first_col = first_col
-        self._second_col = second_col
-        self._seen = set()
-        self.modified = []
+        # Check if the column names are as expected
+        if not all(col in primersheet.columns for col in ['forward_primer', 'reverse_primer']):
+            return False, "Column names in the primersheet should be 'forward_primer' and 'reverse_primer'."
 
-    def validate_and_transform(self, row):
-        """
-        Perform all validations on the given row and insert the read pairing status.
-        Args:
-            row (dict): A mapping from column headers (keys) to elements of that row
-                (values).
+        # Check if the values are sequences
+        for col in ['forward_primer', 'reverse_primer']:
+            if not is_valid_sequence(primersheet.at[0, col]):
+                return False, f"The value in the column '{col}' of the primersheet is not a valid DNA sequence."
 
-        """
-        self._validate_first(row)
-        self._validate_second(row)
-        self._seen.add((row[self._first_col], row[self._second_col]))
-        self.modified.append(row)
+        # Save the adjusted primersheet as a CSV with the specified output filename
+        primersheet.to_csv(output_filename, index=False)
 
-    def _validate_first(self, row):
-        """Assert that the first column is non-empty and has the right format."""
-        if len(row[self._first_col]) <= 0:
-            raise AssertionError("Primer input is not correct, missing forward primer.")
+        return True, f"Primersheet meets all the criteria and has been saved as '{output_filename}'."
 
-    def _validate_second(self, row):
-        """Assert that the second column has the right format if it exists."""
-        if len(row[self._second_col]) <= 0:
-            raise AssertionError("Primer input is not correct, missing reverse primer.")
-    
-
-def read_head(handle, num_lines=2):
-    """Read the specified number of lines from the current position in the file."""
-    lines = []
-    for idx, line in enumerate(handle):
-        if idx == num_lines:
-            break
-        lines.append(line)
-    return "".join(lines)
-
-
-def sniff_format(handle):
-    """
-    Detect the tabular format.
-
-    Args:
-        handle (text file): A handle to a `text file`_ object. The read position is
-        expected to be at the beginning (index 0).
-
-    Returns:
-        csv.Dialect: The detected tabular format.
-
-    .. _text file:
-        https://docs.python.org/3/glossary.html#term-text-file
-
-    """
-    peek = read_head(handle)
-    handle.seek(0)
-    sniffer = csv.Sniffer()
-    dialect = sniffer.sniff(peek)
-    return dialect
-
-
-def check_primersheet(file_in, file_out):
-    """
-    Check that the tabular samplesheet has the structure expected by nf-core pipelines.
-
-    Validate the general shape of the table, expected columns, and each row. Also add
-    an additional column which records whether one or two FASTQ reads were found.
-
-    Args:
-        file_in (pathlib.Path): The given tabular samplesheet. The format can be either
-            CSV, TSV, or any other format automatically recognized by ``csv.Sniffer``.
-        file_out (pathlib.Path): Where the validated and transformed samplesheet should
-            be created; always in CSV format.
-
-    Example:
-            forward_primer,reverse_primer
-            
-    """
-    required_columns = {"forward_primer", "reverse_primer"}
-    # See https://docs.python.org/3.9/library/csv.html#id3 to read up on `newline=""`.
-    with file_in.open(newline="") as in_handle:
-        reader = csv.DictReader(in_handle, dialect=sniff_format(in_handle))
-        # Validate the existence of the expected header columns.
-        if not required_columns.issubset(reader.fieldnames):
-            req_cols = ", ".join(required_columns)
-            logger.critical(f"The primer sheet **must** contain these column headers: {req_cols}.")
-            sys.exit(1)
-        # Validate each row.
-        checker = RowChecker()
-        for i, row in enumerate(reader):
-            try:
-                checker.validate_and_transform(row)
-            except AssertionError as error:
-                logger.critical(f"{str(error)} On line {i + 2}.")
-                sys.exit(1)
-    header = list(reader.fieldnames)
-    # See https://docs.python.org/3.9/library/csv.html#id3 to read up on `newline=""`.
-    with file_out.open(mode="w", newline="") as out_handle:
-        writer = csv.DictWriter(out_handle, header, delimiter=",")
-        writer.writeheader()
-        for row in checker.modified:
-            writer.writerow(row)
-
-
-def parse_args(argv=None):
-    """Define and immediately parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Validate and transform a tabular primersheet.",
-        epilog="Example: python check_primersheet.py primersheet.csv primersheet.valid.csv",
-    )
-    parser.add_argument(
-        "file_in",
-        metavar="FILE_IN",
-        type=Path,
-        help="Tabular input primersheet in CSV or TSV format.",
-    )
-    parser.add_argument(
-        "file_out",
-        metavar="FILE_OUT",
-        type=Path,
-        help="Transformed output primersheet in CSV format.",
-    )
-    parser.add_argument(
-        "-l",
-        "--log-level",
-        help="The desired log level (default WARNING).",
-        choices=("CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"),
-        default="WARNING",
-    )
-    return parser.parse_args(argv)
-
-
-def main(argv=None):
-    """Coordinate argument parsing and program execution."""
-    args = parse_args(argv)
-    logging.basicConfig(level=args.log_level, format="[%(levelname)s] %(message)s")
-    if not args.file_in.is_file():
-        logger.error(f"The given input file {args.file_in} was not found!")
-        sys.exit(2)
-    args.file_out.parent.mkdir(parents=True, exist_ok=True)
-    check_primersheet(args.file_in, args.file_out)
-
+    except Exception as e:
+        return False, str(e)
 
 if __name__ == "__main__":
-    sys.exit(main())
+    if len(sys.argv) != 3:
+        print("Usage: python script.py <input_filename> <output_filename>")
+        sys.exit(1)
+
+    input_filename = sys.argv[1]
+    output_filename = sys.argv[2]
+
+    is_valid, message = check_primersheet(input_filename, output_filename)
+
+    if is_valid:
+        print("Primersheet is valid and saved as", output_filename)
+    else:
+        print("Primersheet is not valid:", message)

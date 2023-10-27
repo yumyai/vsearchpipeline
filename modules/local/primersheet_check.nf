@@ -2,10 +2,10 @@ process PRIMERSHEET_CHECK {
     tag "$primersheet"
     label 'process_single'
 
-    conda "conda-forge::python=3.8.3"
+    conda "conda-forge::pandas=2.1.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/python:3.8.3' :
-        'biocontainers/python:3.8.3' }"
+        'https://depot.galaxyproject.org/singularity/pandas:1.5.2' :
+        'biocontainers/pandas:1.5.2' }"
 
     input:
     path primersheet

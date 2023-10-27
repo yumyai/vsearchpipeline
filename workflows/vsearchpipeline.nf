@@ -84,10 +84,10 @@ workflow VSEARCHPIPELINE {
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
     INPUT_CHECK (
-        file(params.input)
+        file(params.input),
+        file(params.primers)
     )
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
-   
     //
     // MODULE: Run FastQC
     //
@@ -96,22 +96,35 @@ workflow VSEARCHPIPELINE {
         INPUT_CHECK.out.reads
     )
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+    ch_primers = INPUT_CHECK.out.primers.first()
+
+    // INPUT_CHECK.out.primers.primer.reverse.view()
+
+    // ch_forward = Channel.value(INPUT_CHECK.out.primers.forward)
+    // ch_reverse = Channel.value(INPUT_CHECK.out.primers.reverse)
 
     //
     // MODULE: Run Seqtk trimfq
     //
-
-    SEQTK_TRIMFQ (
-        INPUT_CHECK.out.reads, 
-        tuple(params.fwd_primer, params.rev_primer)
-    )
+    if (!params.without_primers) {
+        SEQTK_TRIMFQ (
+            INPUT_CHECK.out.reads, 
+            ch_primers
+        ).reads.set {ch_trimmed_reads}
+    } else {
+        ch_trimmed_reads = INPUT_CHECK.out.reads
+    }    
 
     //
     // MODULE: Run VSEARCH on separate samples
     //
 
     VSEARCH_FASTQMERGEPAIRS (
-        SEQTK_TRIMFQ.out.reads
+        ch_trimmed_reads,
+        params.allowmergestagger,
+        params.maxdiffs,
+        params.minlength,
+        params.maxlength
     )
 
     VSEARCH_FASTQFILTER (

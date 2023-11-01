@@ -47,7 +47,9 @@ include { MAFFT }                       from '../modules/local/mafft'
 include { VERYFASTTREE }                from '../modules/local/veryfasttree'
 include { SILVADATABASES }              from '../modules/local/silvadatabases'
 include { DADA2_ASSIGNTAXONOMY }        from '../modules/local/dada2/assigntaxonomy'
-include { PHYLOSEQ }                    from '../modules/local/phyloseq'
+include { PHYLOSEQ_MAKEOBJECT }         from '../modules/local/phyloseq/makeobject'
+include { PHYLOSEQ_RAREFACTION }        from '../modules/local/phyloseq/rarefaction'
+include { PHYLOSEQ_FIXTAXONOMY }        from '../modules/local/phyloseq/fixtaxonomy'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -212,14 +214,32 @@ workflow VSEARCHPIPELINE {
     //
     // MODULE: Make phyloseq object
     //
-    PHYLOSEQ (
+    PHYLOSEQ_MAKEOBJECT (
         VSEARCH_UCHIMEDENOVO.out.asvs,
         VSEARCH_USEARCHGLOBAL.out.counts,
         VERYFASTTREE.out.tree,
         DADA2_ASSIGNTAXONOMY.out.taxtable
     )
-    ch_versions = ch_versions.mix(PHYLOSEQ.out.versions)
+    ch_versions = ch_versions.mix(PHYLOSEQ_MAKEOBJECT.out.versions)
 
+    //
+    // MODULE: Rarefaction
+    //
+    if (params.rarefaction) {
+        PHYLOSEQ_RAREFACTION (
+            PHYLOSEQ_MAKEOBJECT.out.phyloseq,
+            params.rarelevel,
+            params.rareprune
+        ).phyloseq.set{ ch_rarefied_phyloseq }
+    } else {
+        ch_rarefied_phyloseq = PHYLOSEQ_MAKEOBJECT.out.phyloseq
+    }
+
+    if (params.fixtaxonomy) {
+        PHYLOSEQ_FIXTAXONOMY (
+            ch_rarefied_phyloseq
+        )
+    }
     //
     // MODULE: Collect software versions
     //

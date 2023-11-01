@@ -299,6 +299,58 @@
         "tryrevcompl": {
             "type": "boolean",
             "default": true
+        },
+        "derep_strand": {
+            "type": "string",
+            "default": "plus"
+        },
+        "derep_fastawidth": {
+            "type": "integer",
+            "default": 0
+        },
+        "derep_strand_all": {
+            "type": "string",
+            "default": "plus"
+        },
+        "derep_fastawidth_all": {
+            "type": "integer",
+            "default": 0
+        },
+        "derep_minunique_all": {
+            "type": "integer",
+            "default": 2
+        },
+        "cluster_minsize": {
+            "type": "integer",
+            "default": 8
+        },
+        "cluster_alpha": {
+            "type": "integer",
+            "default": 2
+        },
+        "uchime_label": {
+            "type": "string",
+            "default": "ASV_"
+        },
+        "usearch_id": {
+            "type": "number",
+            "default": 0.97
+        },
+        "rarefaction": {
+            "type": "boolean",
+            "default": false
+        },
+        "rarelevel": {
+            "type": "integer",
+            "default": ""
+        },
+        "rareprune": {
+            "type": "boolean",
+            "default": "false"
+        },
+        "fixtaxonomy": {
+            "type": "boolean",
+            "default": "true"
         }
     }
 }

@@ -1,11 +1,7 @@
-process PHYLOSEQ {
+process PHYLOSEQ_MAKEOBJECT {
     // tag '$bam'
     label 'process_low'
-
-    conda "/miniforge3/envs/phyloseq"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'docker://barbarahelena/phylomodule:1.1':
-        'docker://barbarahelena/phylomodule:1.1' }"
+    label 'phyloseq'
 
     input:
     path asvs
@@ -59,7 +55,7 @@ process PHYLOSEQ {
             paste0("    R: ", paste0(R.Version()[c("major","minor")], collapse = "."), "\n"),
             paste0("    phyloseq: ", packageVersion("phyloseq"), "\n"),
             paste0("    phytools: ", packageVersion("phytools"), "\n"),
-            paste0("    Biostrings: ", packageVersion("Biostrings"), "\n")), 
+            paste0("    Biostrings: ", packageVersion("Biostrings"))), 
         "versions.yml")
 
     """

@@ -19,7 +19,7 @@
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.csv$",
                     "description": "Path to comma-separated file containing information about the samples in the experiment.",
-                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/vsearchpipeline/usage#samplesheet-input).",
+                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row.",
                     "fa_icon": "fas fa-file-csv"
                 },
                 "outdir": {
@@ -253,16 +253,16 @@
     ],
     "properties": {
         "without_primers": {
-            "type": "string",
-            "default": "false"
+            "type": "boolean",
+            "default": false
         },
         "primers": {
             "type": "string",
-            "default": null
+            "default": "None"
         },
         "allowmergestagger": {
-            "type": "string",
-            "default": "false"
+            "type": "boolean",
+            "default": false
         },
         "maxdiffs": {
             "type": "integer",
@@ -270,11 +270,35 @@
         },
         "minlength": {
             "type": "string",
-            "default": null
+            "default": ""
         },
         "maxlength": {
             "type": "string",
-            "default": null
+            "default": ""
+        },
+        "fastqmaxee": {
+            "type": "integer",
+            "default": 1
+        },
+        "fastqwidth": {
+            "type": "integer",
+            "default": 0
+        },
+        "fastqmaxns": {
+            "type": "integer",
+            "default": 0
+        },
+        "dada2minboot": {
+            "type": "integer",
+            "default": 80
+        },
+        "dada2allowmultiple": {
+            "type": "integer",
+            "default": 3
+        },
+        "tryrevcompl": {
+            "type": "boolean",
+            "default": true
         }
     }
 }

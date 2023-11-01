@@ -77,7 +77,6 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 def multiqc_report = []
 
 workflow VSEARCHPIPELINE {
-
     ch_versions = Channel.empty()
 
     //
@@ -91,20 +90,14 @@ workflow VSEARCHPIPELINE {
     //
     // MODULE: Run FastQC
     //
-
     FASTQC (
         INPUT_CHECK.out.reads
     )
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
     ch_primers = INPUT_CHECK.out.primers.first()
 
-    // INPUT_CHECK.out.primers.primer.reverse.view()
-
-    // ch_forward = Channel.value(INPUT_CHECK.out.primers.forward)
-    // ch_reverse = Channel.value(INPUT_CHECK.out.primers.reverse)
-
     //
-    // MODULE: Run Seqtk trimfq
+    // MODULE:  Seqtk trim primers in fastq files
     //
     if (!params.without_primers) {
         SEQTK_TRIMFQ (
@@ -116,9 +109,8 @@ workflow VSEARCHPIPELINE {
     }    
 
     //
-    // MODULE: Run VSEARCH on separate samples
+    // MODULE: VSEARCH merge fastq pairs
     //
-
     VSEARCH_FASTQMERGEPAIRS (
         ch_trimmed_reads,
         params.allowmergestagger,
@@ -127,57 +119,110 @@ workflow VSEARCHPIPELINE {
         params.maxlength
     )
 
+    //
+    // MODULE: VSEARCH filter fastq files
+    //
     VSEARCH_FASTQFILTER (
-        VSEARCH_FASTQMERGEPAIRS.out.reads
+        VSEARCH_FASTQMERGEPAIRS.out.reads,
+        params.fastqmaxee,
+        params.fastqwidth,
+        params.fastqmaxns 
     )
 
+    //
+    // MODULE: VSEARCH dereplicate per sample
+    //
     VSEARCH_DEREPFULLLENGTH (
-        VSEARCH_FASTQFILTER.out.reads
+        VSEARCH_FASTQFILTER.out.reads,
+        params.derep_strand,
+        params.derep_fastawidth
     )
 
+    //
+    // Combine all reads
+    //
     fasta_files = VSEARCH_DEREPFULLLENGTH.out.reads
         .collect { it[1] }
 
+    // 
+    // MODULE: VSEARCH dereplicate for all reads
+    //
     VSEARCH_DEREPFULLLENGTHALL (
-        fasta_files
+        fasta_files,
+        params.derep_strand_all,
+        params.derep_fastawidth_all,
+        params.derep_minunique_all
     )
-
+    //
+    // MODULE: VSEARCH cluster asvs
+    //
     VSEARCH_CLUSTERUNOISE (
-        VSEARCH_DEREPFULLLENGTHALL.out.reads
+        VSEARCH_DEREPFULLLENGTHALL.out.reads,
+        params.cluster_minsize,
+        params.cluster_alpha
     )
-
+    //
+    // MODULE: VSEARCH chimera detection
+    //
     VSEARCH_UCHIMEDENOVO (
-        VSEARCH_CLUSTERUNOISE.out.asvs
+        VSEARCH_CLUSTERUNOISE.out.asvs,
+        params.uchime_label
     )
-
+    //
+    // MODULE: VSEARCH make count table
+    //
     VSEARCH_USEARCHGLOBAL (
         VSEARCH_DEREPFULLLENGTHALL.out.concatreads,
-        VSEARCH_UCHIMEDENOVO.out.asvs
+        VSEARCH_UCHIMEDENOVO.out.asvs,
+        params.usearch_id
     )
-
+    ch_versions = ch_versions.mix(VSEARCH_USEARCHGLOBAL.out.versions)
+    //
+    // MODULE: MAFFT for multiple sequence alignment
+    //
     MAFFT (
         VSEARCH_UCHIMEDENOVO.out.asvs
     )
-
+    ch_versions = ch_versions.mix(MAFFT.out.versions)
+    //
+    // MODULE: Make tree with veryfasttree (fasttree with double precision)
+    //
     VERYFASTTREE (
         MAFFT.out.msa
     )
-
+    ch_versions = ch_versions.mix(VERYFASTTREE.out.versions)
+    // 
+    // MODULE: Download SILVA if not already present in db folder
+    //
     SILVADATABASES()
     
+    // 
+    // MODULE: DADA2 Assign taxonomy with SILVA db
+    //
     DADA2_ASSIGNTAXONOMY (
         VSEARCH_UCHIMEDENOVO.out.asvs,
         SILVADATABASES.out.asvdb,
-        SILVADATABASES.out.speciesdb
+        SILVADATABASES.out.speciesdb,
+        params.dada2minboot,
+        params.dada2allowmultiple,
+        params.tryrevcompl
     )
+    ch_versions = ch_versions.mix(DADA2_ASSIGNTAXONOMY.out.versions)
 
+    //
+    // MODULE: Make phyloseq object
+    //
     PHYLOSEQ (
         VSEARCH_UCHIMEDENOVO.out.asvs,
         VSEARCH_USEARCHGLOBAL.out.counts,
         VERYFASTTREE.out.tree,
         DADA2_ASSIGNTAXONOMY.out.taxtable
     )
+    ch_versions = ch_versions.mix(PHYLOSEQ.out.versions)
 
+    //
+    // MODULE: Collect software versions
+    //
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )

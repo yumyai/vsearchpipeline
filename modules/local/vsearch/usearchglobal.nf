@@ -1,13 +1,11 @@
 process VSEARCH_USEARCHGLOBAL {
     label 'process_medium'
-    conda "bioconda::vsearch=2.23.0"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/vsearch:2.21.2--hf1761c0_0 ':
-        'biocontainers/vsearch:2.23.0--h6a68c12_0' }"
+    label 'vsearch'
 
     input:
     path(allreads)
     path(asvs)
+    val id
     
     output:
     path "count_table.txt"          , emit: counts
@@ -23,12 +21,12 @@ process VSEARCH_USEARCHGLOBAL {
     vsearch \\
         --usearch_global $allreads \\
         --db $asvs \\
-        --id 0.97 \\
+        --id $id \\
         --otutabout count_table.txt
-    
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        : \$(echo \$(vsearch --version 2>&1) | sed 's/^.*vsearch //; s/Using.*\$//' ))
+        vsearch: \$(vsearch --version 2>&1 | head -n 1 | sed 's/vsearch //g' | sed 's/,.*//g' | sed 's/^v//' | sed 's/_.*//')
     END_VERSIONS
     """
 

@@ -1,13 +1,13 @@
 process VSEARCH_DEREPFULLLENGTHALL {
     //tag "$meta.id"
     label 'process_single'
-    conda "bioconda::vsearch=2.23.0"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/vsearch:2.21.2--hf1761c0_0 ':
-        'biocontainers/vsearch:2.23.0--h6a68c12_0' }"
+    label 'vsearch'
 
     input:
     path(reads)
+    val strand
+    val fastawidth
+    val minunique
 
     output:
     path("all.concat.fasta") , emit: concatreads
@@ -26,11 +26,11 @@ process VSEARCH_DEREPFULLLENGTHALL {
     vsearch \\
         --derep_fulllength all.concat.fasta\\
         --output all.derep.fasta \\
-        --strand plus \\
+        --strand $strand \\
         --sizein \\
         --sizeout \\
-        --fasta_width 0 \\
-        --minuniquesize 2
+        --fasta_width $fastawidth \\
+        --minuniquesize $minunique
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

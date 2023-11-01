@@ -5,7 +5,7 @@ process PHYLOSEQ {
     conda "/miniforge3/envs/phyloseq"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'docker://barbarahelena/phylomodule:1.1':
-        'barbarahelena/phylomodule:1.1' }"
+        'docker://barbarahelena/phylomodule:1.1' }"
 
     input:
     path asvs
@@ -15,7 +15,7 @@ process PHYLOSEQ {
 
     output:
     path "phyloseq.RDS"      , emit: phyloseq
-    //path "versions.yml"             , emit: versions
+    path "versions.yml"      , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -55,18 +55,25 @@ process PHYLOSEQ {
 
     saveRDS(ps, "phyloseq.RDS")
 
+    writeLines(paste0("\\"${task.process}\\":\n", 
+            paste0("    R: ", paste0(R.Version()[c("major","minor")], collapse = "."), "\n"),
+            paste0("    phyloseq: ", packageVersion("phyloseq"), "\n"),
+            paste0("    phytools: ", packageVersion("phytools"), "\n"),
+            paste0("    Biostrings: ", packageVersion("Biostrings"), "\n")), 
+        "versions.yml")
+
     """
-// versions <- list()
-//     versions["phyloseq"] <- as.character(packageVersion("phyloseq"))
-//     versions["phylotools"] <- as.character(packageVersion("phytools"))
-//     versions["biostrings"] <- as.character(packageVersion("Biostrings"))
-//     versions
-//     write_yaml(versions, "versions.yml")
 
     stub:
     def args = task.ext.args ?: ''
     """
-    touch 
+    touch phyloseq.RDS
 
+    writeLines(paste0("\\"${task.process}\\":\n", 
+            paste0("    R: ", paste0(R.Version()[c("major","minor")], collapse = "."), "\n"),
+            paste0("    phyloseq: ", packageVersion("phyloseq"), "\n"),
+            paste0("    phytools: ", packageVersion("phytools"), "\n"),
+            paste0("    Biostrings: ", packageVersion("Biostrings"), "\n")), 
+        "versions.yml")
     """
 }

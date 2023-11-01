@@ -23,8 +23,9 @@ process MAFFT {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        : \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//' ))
+        mafft: \$(mafft --version 2>&1 | sed 's/^v//' | sed 's/ (.*)//')
     END_VERSIONS
+
     """
 
     stub:

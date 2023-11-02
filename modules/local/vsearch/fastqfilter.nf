@@ -1,6 +1,6 @@
 process VSEARCH_FASTQFILTER {
     tag "$meta.id"
-    label 'process_single'
+    label 'process_single_low'
     label 'vsearch'
 
     input:
@@ -20,17 +20,17 @@ process VSEARCH_FASTQFILTER {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def filtered = "${prefix}.filtered.fasta"
-    def maxns = maxns ?: "${maxns}" 
-    def width = width ?: "${width}"
-    def maxee = maxee ?: "${maxee}"
+    def fastq_maxns = maxns ?: "${maxns}" 
+    def fastq_width = width ?: "${width}"
+    def fastq_maxee = maxee ?: "${maxee}"
 
     """
     vsearch \\
         --fastq_filter $reads \\
-        -fastq_maxee ${maxee} \\
+        -fastq_maxee ${fastq_maxee} \\
         -fastaout $filtered \\
-        --fasta_width ${width} \\
-        --fastq_maxns ${maxns}
+        --fasta_width ${fastq_width} \\
+        --fastq_maxns ${fastq_maxns}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

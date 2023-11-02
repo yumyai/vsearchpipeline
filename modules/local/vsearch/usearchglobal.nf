@@ -1,5 +1,5 @@
 process VSEARCH_USEARCHGLOBAL {
-    label 'process_medium'
+    label 'process_multi_med'
     label 'vsearch'
 
     input:
@@ -22,6 +22,7 @@ process VSEARCH_USEARCHGLOBAL {
         --usearch_global $allreads \\
         --db $asvs \\
         --id $id \\
+        --threads $task.cpus \\
         --otutabout count_table.txt
 
     cat <<-END_VERSIONS > versions.yml

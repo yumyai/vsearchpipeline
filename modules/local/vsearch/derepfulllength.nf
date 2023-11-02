@@ -1,6 +1,6 @@
 process VSEARCH_DEREPFULLLENGTH {
     tag "$meta.id"
-    label 'process_single'
+    label 'process_single_low'
     label 'vsearch'
 
     input:

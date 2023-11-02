@@ -1,5 +1,5 @@
 process PHYLOSEQ_RAREFACTION {
-    label 'process_single'
+    label 'process_multi_low'
     label 'phyloseq'
 
     input:
@@ -18,7 +18,7 @@ process PHYLOSEQ_RAREFACTION {
     def args = task.ext.args ?: ''
     def seed = task.ext.seed ?: '1234'
     def rarelevel = rarelevel ? "${rarelevel}" : 'NA'
-    def prune = prune ? 'TRUE' : 'FALSE'
+    def skipprune = skipprune ? 'TRUE' : 'FALSE'
 
     """
     #!/usr/bin/env Rscript
@@ -58,7 +58,7 @@ process PHYLOSEQ_RAREFACTION {
     }
 
     ## Remove constant/empty ASVs
-        if($prune != FALSE){
+        if($skipprune == FALSE){
             print('Prune taxa to remove contant or empty ASVs.')
             phylo_prune <- prune_taxa(taxa_sums(phylo_rare) > 0, phylo_rare)
             print(paste0('The phyloseq object has ', nsamples(phylo_prune), ' samples and',

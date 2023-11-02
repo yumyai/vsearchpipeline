@@ -1,5 +1,5 @@
 process VSEARCH_UCHIMEDENOVO {
-    label 'process_single'
+    label 'process_single_low'
     label 'vsearch'
 
     input:
@@ -20,6 +20,7 @@ process VSEARCH_UCHIMEDENOVO {
         --uchime3_denovo $reads \\
         --chimeras chimeras.fasta \\
         --nonchimeras asvs_nonchimeras.fasta \\
+        --threads $task.cpus \\
         --relabel $label
     """
 

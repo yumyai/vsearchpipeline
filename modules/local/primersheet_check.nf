@@ -1,6 +1,6 @@
 process PRIMERSHEET_CHECK {
     tag "$primersheet"
-    label 'process_single'
+    label 'process_multi_low'
 
     conda "conda-forge::pandas=2.1.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?

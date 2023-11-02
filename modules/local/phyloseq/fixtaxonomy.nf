@@ -1,5 +1,5 @@
 process PHYLOSEQ_FIXTAXONOMY {
-    label 'process_single'
+    label 'process_multi_low'
     label 'phyloseq'
 
     input:

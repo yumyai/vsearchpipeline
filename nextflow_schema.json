@@ -252,10 +252,6 @@
         }
     ],
     "properties": {
-        "without_primers": {
-            "type": "boolean",
-            "default": false
-        },
         "primers": {
             "type": "string",
             "default": "None"
@@ -336,21 +332,24 @@
             "type": "number",
             "default": 0.97
         },
-        "rarefaction": {
-            "type": "boolean",
-            "default": false
-        },
         "rarelevel": {
-            "type": "integer",
-            "default": ""
+            "type": "integer"
         },
-        "rareprune": {
-            "type": "boolean",
+        "skip_primers": {
+            "type": "string",
             "default": "false"
         },
-        "fixtaxonomy": {
-            "type": "boolean",
+        "skip_rarefaction": {
+            "type": "string",
             "default": "true"
+        },
+        "skip_rareprune": {
+            "type": "string",
+            "default": "true"
+        },
+        "skip_fixtaxonomy": {
+            "type": "string",
+            "default": "false"
         }
     }
 }

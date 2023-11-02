@@ -1,5 +1,5 @@
 process VSEARCH_CLUSTERUNOISE {
-    label 'process_single'
+    label 'process_multi_verylow'
     label 'vsearch'
     
     input:
@@ -21,6 +21,7 @@ process VSEARCH_CLUSTERUNOISE {
         --cluster_unoise $reads \\
         --centroids asvs.clustered.fasta \\
         --minsize $minsize \\
+        --threads $task.cpus \\
         --unoise_alpha $alpha
     """
 

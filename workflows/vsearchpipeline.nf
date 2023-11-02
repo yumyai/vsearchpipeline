@@ -101,7 +101,7 @@ workflow VSEARCHPIPELINE {
     //
     // MODULE:  Seqtk trim primers in fastq files
     //
-    if (!params.without_primers) {
+    if (!params.skip_primers) {
         SEQTK_TRIMFQ (
             INPUT_CHECK.out.reads, 
             ch_primers
@@ -129,6 +129,7 @@ workflow VSEARCHPIPELINE {
         params.fastqmaxee,
         params.fastqwidth,
         params.fastqmaxns 
+
     )
 
     //
@@ -225,7 +226,7 @@ workflow VSEARCHPIPELINE {
     //
     // MODULE: Rarefaction
     //
-    if (params.rarefaction) {
+    if (!params.skip_rarefaction) {
         PHYLOSEQ_RAREFACTION (
             PHYLOSEQ_MAKEOBJECT.out.phyloseq,
             params.rarelevel,
@@ -235,7 +236,7 @@ workflow VSEARCHPIPELINE {
         ch_rarefied_phyloseq = PHYLOSEQ_MAKEOBJECT.out.phyloseq
     }
 
-    if (params.fixtaxonomy) {
+    if (!params.skip_fixtaxonomy) {
         PHYLOSEQ_FIXTAXONOMY (
             ch_rarefied_phyloseq
         )

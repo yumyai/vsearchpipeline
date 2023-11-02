@@ -1,6 +1,5 @@
 process DADA2_ASSIGNTAXONOMY {
-    //tag "${fasta},${database}"
-    label 'process_high'
+    label 'process_multi_high'
 
     conda "bioconda::bioconductor-dada2=1.22.0 conda-forge::r-digest=0.6.30"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -33,7 +32,7 @@ process DADA2_ASSIGNTAXONOMY {
     set.seed($seed)
     taxtable <- assignTaxonomy( "$asvs", 
                                 "$silva_asv_db", 
-                                multithread = $task.cpus, 
+                                multithread = TRUE, 
                                 minBoot = $minboot, 
                                 verbose = TRUE)
     taxa <- addSpecies( taxtable, 

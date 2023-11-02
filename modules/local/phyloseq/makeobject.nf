@@ -1,6 +1,5 @@
 process PHYLOSEQ_MAKEOBJECT {
-    // tag '$bam'
-    label 'process_low'
+    label 'process_multi_low'
     label 'phyloseq'
 
     input:
@@ -69,7 +68,7 @@ process PHYLOSEQ_MAKEOBJECT {
             paste0("    R: ", paste0(R.Version()[c("major","minor")], collapse = "."), "\n"),
             paste0("    phyloseq: ", packageVersion("phyloseq"), "\n"),
             paste0("    phytools: ", packageVersion("phytools"), "\n"),
-            paste0("    Biostrings: ", packageVersion("Biostrings"), "\n")), 
+            paste0("    Biostrings: ", packageVersion("Biostrings"))), 
         "versions.yml")
     """
 }

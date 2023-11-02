@@ -1,5 +1,5 @@
 process SILVADATABASES {
-    label 'process_single'
+    label 'process_single_med'
     storeDir 'db'
 
     output:

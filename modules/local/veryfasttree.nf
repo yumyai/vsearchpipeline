@@ -1,6 +1,6 @@
 process VERYFASTTREE {
     //tag '$bam'
-    label 'process_single'
+    label 'process_low'
 
     conda "bioconda::veryfasttree=4.0.03"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -20,7 +20,13 @@ process VERYFASTTREE {
     script:
     def args = task.ext.args ?: ''
     """
-    VeryFastTree -nt -double-precision -gtr -gamma $msa > asvs.msa.tree
+    VeryFastTree \\
+        -nt \\
+        -double-precision \\
+        -gtr \\
+        -gamma $msa \\
+        -threads $task.cpus \\
+        > asvs.msa.tree
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

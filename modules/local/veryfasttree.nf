@@ -9,6 +9,7 @@ process VERYFASTTREE {
 
     input:
     path msa
+    val tree_dp
 
     output:
     path "asvs.msa.tree"    , emit: tree
@@ -19,10 +20,12 @@ process VERYFASTTREE {
 
     script:
     def args = task.ext.args ?: ''
+    def dp = tree_dp ? "-double-precision" : ''
+    
     """
     VeryFastTree \\
         -nt \\
-        -double-precision \\
+        $dp \\
         -gtr \\
         -gamma $msa \\
         -threads $task.cpus \\

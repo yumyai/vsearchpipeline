@@ -26,8 +26,8 @@ process VSEARCH_FASTQMERGEPAIRS {
     def merged = "${prefix}.merged.fastq.gz"
     def allowmergestagger = allowmergestagger ? "--fastq_allowmergestagger" : ''
     def maxdiffs = maxdiffs ? "--fastq_maxdiffs ${maxdiffs}" : ''
-    def minmerge = minlength ? "--fastq_minmergelen ${minlength}" : ''
-    def maxmerge = maxlength ? "--fastq_maxmergelen ${maxlength}" : ''
+    def minmerge = minlength != 0 ? "--fastq_minmergelen ${minlength}" : ''
+    def maxmerge = maxlength != 0 ? "--fastq_maxmergelen ${maxlength}" : ''
 
     """
     vsearch \\

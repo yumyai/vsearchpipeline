@@ -1,6 +1,6 @@
 process VSEARCH_DEREPFULLLENGTHALL {
     //tag "$meta.id"
-    label 'process_single_low'
+    label 'process_single_med'
     label 'vsearch'
     label 'error_retry'
 

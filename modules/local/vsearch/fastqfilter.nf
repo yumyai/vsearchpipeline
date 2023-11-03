@@ -21,17 +21,14 @@ process VSEARCH_FASTQFILTER {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def filtered = "${prefix}.filtered.fasta"
-    def fastq_maxns = maxns ?: "${maxns}" 
-    def fastq_width = width ?: "${width}"
-    def fastq_maxee = maxee ?: "${maxee}"
 
     """
     vsearch \\
         --fastq_filter $reads \\
-        -fastq_maxee ${fastq_maxee} \\
+        -fastq_maxee $maxee \\
         -fastaout $filtered \\
-        --fasta_width ${fastq_width} \\
-        --fastq_maxns ${fastq_maxns}
+        --fasta_width $width \\
+        --fastq_maxns $maxns
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

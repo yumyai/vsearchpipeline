@@ -133,11 +133,10 @@ workflow VSEARCHPIPELINE {
     VSEARCH_FASTQFILTER (
         VSEARCH_FASTQMERGEPAIRS.out.reads,
         params.fastqmaxee,
-        params.fastqwidth,
+        params.fastawidth,
         params.fastqmaxns 
 
     )
-
     //
     // MODULE: VSEARCH dereplicate per sample
     //
@@ -146,7 +145,6 @@ workflow VSEARCHPIPELINE {
         params.derep_strand,
         params.derep_fastawidth
     )
-
     //
     // Combine all reads
     //
@@ -197,7 +195,8 @@ workflow VSEARCHPIPELINE {
     // MODULE: Make tree with veryfasttree (fasttree with double precision)
     //
     VERYFASTTREE (
-        MAFFT.out.msa
+        MAFFT.out.msa,
+        params.tree_doubleprecision
     )
     ch_versions = ch_versions.mix(VERYFASTTREE.out.versions)
     // 

@@ -22,6 +22,11 @@
                     "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row.",
                     "fa_icon": "fas fa-file-csv"
                 },
+                "primers": {
+                    "type": "string",
+                    "fa_icon": "fas fa-file-csv",
+                    "description": "Path to comma-separated file containing forward_primer and reverse_primer sequences"
+                },
                 "outdir": {
                     "type": "string",
                     "format": "directory-path",
@@ -235,6 +240,197 @@
                     "help_text": "Allows string values that are parseable as numbers or booleans. For further information see [JSONSchema docs](https://github.com/everit-org/json-schema#lenient-mode)."
                 }
             }
+        },
+        "vsearch_options": {
+            "title": "VSEARCH options",
+            "type": "object",
+            "description": "Options for fastqmerge, fastqfilter, cluster_unoise, uchime and usearch_global processes",
+            "default": "",
+            "properties": {
+                "allowmergestagger": {
+                    "type": "boolean",
+                    "description": "Fastq merge process: : allow merging of staggered read pairs.",
+                    "help_text": "When using --fastq_mergepairs, allow merging of staggered read pairs. Staggered pairs\nare pairs where the 3\u2019 end of the reverse read has an overhang to the left of the 5\u2019 end\nof the forward read. This situation can occur when a very short fragment is sequenced.\nThe 3\u2019 overhang of the reverse read is not included in the merged sequence. The oppo-\nsite option is the --fastq_nostagger option. The default is to discard staggered pairs.",
+                    "fa_icon": "fas fa-hashtag"
+                },
+                "maxdiffs": {
+                    "type": "integer",
+                    "default": 30,
+                    "help_text": "When using --fastq_mergepairs, specify the maximum number of non-matching nu-\ncleotides allowed in the overlap region. That option has a strong influence on the merg-\ning success rate. The default value is 10.",
+                    "description": "Fastq merge process: Discard input sequences with less than the specified number of bases",
+                    "fa_icon": "fas fa-exchange-alt"
+                },
+                "minlength": {
+                    "type": "integer",
+                    "description": "Fastq merge process: Discard input sequences with less than the specified number of bases",
+                    "fa_icon": "fas fa-ruler-horizontal"
+                },
+                "maxlength": {
+                    "type": "integer",
+                    "description": "Fastq merge process: Discard sequences with more than the specified number of bases",
+                    "fa_icon": "fas fa-ruler-vertical"
+                },
+                "fastqmaxee": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "Filtering process: Discard sequences with an expected error greater than the specified number",
+                    "fa_icon": "fas fa-times"
+                },
+                "fastawidth": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Filtering process: Fasta files produced by vsearch are wrapped (sequences are written on lines of integer nucleotides, 80 by default). Set the value to zero to eliminate the wrapping",
+                    "fa_icon": "fas fa-arrows-alt-h"
+                },
+                "fastqmaxns": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Filtering process: Discard sequences with more than the specified number of N\u2019s.",
+                    "fa_icon": "fas fa-sort-numeric-down"
+                },
+                "derep_strand": {
+                    "type": "string",
+                    "default": "plus",
+                    "description": "Dereplicate process: plus or both strands",
+                    "enum": ["plus", "both"],
+                    "fa_icon": "fas fa-plus"
+                },
+                "derep_fastawidth": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Dereplicate process:",
+                    "fa_icon": "fas fa-arrows-alt-h"
+                },
+                "derep_strand_all": {
+                    "type": "string",
+                    "default": "plus",
+                    "description": "Dereplicate process all samples: plus or both strands",
+                    "enum": ["plus", "both"],
+                    "fa_icon": "fas fa-plus"
+                },
+                "derep_fastawidth_all": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Dereplicate process all samples:",
+                    "fa_icon": "fas fa-arrows-alt-h"
+                },
+                "derep_minunique_all": {
+                    "type": "integer",
+                    "default": 2,
+                    "description": "Dereplicate process all samples",
+                    "fa_icon": "fas fa-fingerprint"
+                },
+                "cluster_minsize": {
+                    "type": "integer",
+                    "default": 8,
+                    "description": "Clustering",
+                    "fa_icon": "fas fa-compress-alt"
+                },
+                "cluster_alpha": {
+                    "type": "integer",
+                    "default": 2,
+                    "description": "Clustering",
+                    "fa_icon": "fas fa-font"
+                },
+                "uchime_label": {
+                    "type": "string",
+                    "default": "ASV_",
+                    "description": "Chimera removal: labeling (prefix) of ASVs",
+                    "fa_icon": "fas fa-tag"
+                },
+                "usearch_id": {
+                    "type": "number",
+                    "default": 0.97,
+                    "description": "Usearch global: id parameter",
+                    "fa_icon": "far fa-address-card"
+                }
+            },
+            "fa_icon": "fas fa-search"
+        },
+        "tree_options": {
+            "title": "Tree options",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "tree_doubleprecision": {
+                    "type": "boolean",
+                    "default": true,
+                    "help_text": "Double precision can help mitigate issues related to numerical instability in tree construction algorithms. Phylogenetic tree construction algorithms involve many iterative numerical calculations, and using double precision can reduce the risk of round-off errors and other numerical issues that can affect the results.",
+                    "description": "VeryFastTree with double precision",
+                    "fa_icon": "fas fa-dna"
+                }
+            },
+            "fa_icon": "fab fa-pagelines"
+        },
+        "dada2_options": {
+            "title": "DADA2 options",
+            "type": "object",
+            "description": "Options for DADA2 assigntaxonomy and addspecies",
+            "default": "",
+            "properties": {
+                "dada2minboot": {
+                    "type": "integer",
+                    "default": 80,
+                    "description": "assignTaxonomy function: The minimum bootstrap confidence for assigning a taxonomic level.",
+                    "fa_icon": "fas fa-terminal"
+                },
+                "dada2allowmultiple": {
+                    "type": "integer",
+                    "default": 3,
+                    "description": "addSpecies function: maximum number of multiple assigned species. If 0, this will be set at FALSE.",
+                    "fa_icon": "fas fa-cubes"
+                },
+                "tryrevcompl": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "assignTaxonomy function: If TRUE, the reverse-complement of each sequences will be used for classification if it is a better match to the reference sequences than the forward sequence.",
+                    "fa_icon": "fas fa-arrow-left"
+                }
+            },
+            "fa_icon": "fas fa-spell-check"
+        },
+        "phyloseq_options": {
+            "title": "Phyloseq options",
+            "type": "object",
+            "description": "Options for phyloseq processes",
+            "default": "",
+            "properties": {
+                "rarelevel": {
+                    "type": "integer",
+                    "description": "Rarefaction level (not used if skip_rarefaction is not set at true)"
+                }
+            },
+            "fa_icon": "fas fa-th-list"
+        },
+        "skip_options": {
+            "title": "Skip options",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "skip_primers": {
+                    "type": "boolean",
+                    "description": "Skip trimming of primers",
+                    "fa_icon": "fas fa-forward"
+                },
+                "skip_rarefaction": {
+                    "type": "boolean",
+                    "description": "Skip rarefaction of phyloseq object",
+                    "fa_icon": "fas fa-forward"
+                },
+                "skip_rareprune": {
+                    "type": "boolean",
+                    "description": "Skip removal of empty or constant ASVs",
+                    "fa_icon": "fas fa-forward"
+                },
+                "skip_fixtaxonomy": {
+                    "type": "boolean",
+                    "description": "Skip process to make a table with composite taxonomy names",
+                    "fa_icon": "fas fa-forward"
+                }
+            },
+            "fa_icon": "fas fa-forward"
         }
     },
     "allOf": [
@@ -249,107 +445,21 @@
         },
         {
             "$ref": "#/definitions/generic_options"
+        },
+        {
+            "$ref": "#/definitions/vsearch_options"
+        },
+        {
+            "$ref": "#/definitions/tree_options"
+        },
+        {
+            "$ref": "#/definitions/dada2_options"
+        },
+        {
+            "$ref": "#/definitions/phyloseq_options"
+        },
+        {
+            "$ref": "#/definitions/skip_options"
         }
-    ],
-    "properties": {
-        "primers": {
-            "type": "string",
-            "default": "None"
-        },
-        "allowmergestagger": {
-            "type": "boolean",
-            "default": false
-        },
-        "maxdiffs": {
-            "type": "integer",
-            "default": 30
-        },
-        "minlength": {
-            "type": "string",
-            "default": ""
-        },
-        "maxlength": {
-            "type": "string",
-            "default": ""
-        },
-        "fastqmaxee": {
-            "type": "integer",
-            "default": 1
-        },
-        "fastqwidth": {
-            "type": "integer",
-            "default": 0
-        },
-        "fastqmaxns": {
-            "type": "integer",
-            "default": 0
-        },
-        "dada2minboot": {
-            "type": "integer",
-            "default": 80
-        },
-        "dada2allowmultiple": {
-            "type": "integer",
-            "default": 3
-        },
-        "tryrevcompl": {
-            "type": "boolean",
-            "default": true
-        },
-        "derep_strand": {
-            "type": "string",
-            "default": "plus"
-        },
-        "derep_fastawidth": {
-            "type": "integer",
-            "default": 0
-        },
-        "derep_strand_all": {
-            "type": "string",
-            "default": "plus"
-        },
-        "derep_fastawidth_all": {
-            "type": "integer",
-            "default": 0
-        },
-        "derep_minunique_all": {
-            "type": "integer",
-            "default": 2
-        },
-        "cluster_minsize": {
-            "type": "integer",
-            "default": 8
-        },
-        "cluster_alpha": {
-            "type": "integer",
-            "default": 2
-        },
-        "uchime_label": {
-            "type": "string",
-            "default": "ASV_"
-        },
-        "usearch_id": {
-            "type": "number",
-            "default": 0.97
-        },
-        "rarelevel": {
-            "type": "integer"
-        },
-        "skip_primers": {
-            "type": "boolean",
-            "default": false
-        },
-        "skip_rarefaction": {
-            "type": "boolean",
-            "default": true
-        },
-        "skip_rareprune": {
-            "type": "boolean",
-            "default": true
-        },
-        "skip_fixtaxonomy": {
-            "type": "boolean",
-            "default": false
-        }
-    }
+    ]
 }

@@ -6,8 +6,9 @@ process PHYLOSEQ_FIXTAXONOMY {
     path    phyloseq
 
     output:
-    path "taxtable.RDS"             , emit: taxonomy
-    path "phylogen_levels.csv"      , emit: phylevels
+    path "taxtable.RDS"                 , emit: taxonomy
+    path "phylogen_levels.csv"          , emit: phylevels
+    path "phylogen_levels_top300.csv"   , emit: phylevelstop
 
     when:
     task.ext.when == null || task.ext.when
@@ -21,10 +22,10 @@ process PHYLOSEQ_FIXTAXONOMY {
 
     ## Open data
     phylo <- readRDS('$phyloseq')
-    print(paste0('The phyloseq object has ', nsamples(phylo), ' samples and',
+    print(paste0('The phyloseq object has ', nsamples(phylo), ' samples and ',
                     ntaxa(phylo), ' taxa.'))
     
-    ### Check phy levels
+    ### Check levels
     tax <- as.data.frame(as(phylo@tax_table, 'matrix'))
     head(tax)
     splevel <- sum(!is.na(tax\$Species)) / nrow(tax) * 100
@@ -40,6 +41,24 @@ process PHYLOSEQ_FIXTAXONOMY {
     )
     write.csv2(df, 'phylogen_levels.csv')
 
+    ### Check levels top 300
+    taxasums <- taxa_sums(phylo)
+    taxasums <- taxasums[order(taxasums, decreasing = T)]
+    top300 <- names(taxasums[1:300])
+    tax300 <- tax[rownames(tax) %in% top300, ]
+    splevel <- sum(!is.na(tax300\$Species)) / nrow(tax300) * 100
+    genlevel <- sum(!is.na(tax300\$Genus)) / nrow(tax300) * 100
+    famlevel <- sum(!is.na(tax300\$Family)) / nrow(tax300) * 100
+    phylevel <- sum(!is.na(tax300\$Phylum)) / nrow(tax300) * 100
+    df2 <- data.frame(
+        level = c("Species", "Genus", "Family", "Phylum"),
+        ntax = rep(nrow(tax300), 4),
+        number_known = c(sum(!is.na(tax\$Species)), sum(!is.na(tax\$Genus)),
+                        sum(!is.na(tax\$Family)), sum(!is.na(tax\$Phylum))),
+        perc_known = c(splevel, genlevel, famlevel, phylevel)
+    )
+    write.csv2(df2, 'phylogen_levels_top300.csv')
+
     # get 'nice' taxonomy for ASVs (unfortunately in base R)
     tax\$Tax <- ifelse(!is.na(tax\$Genus) & !is.na(tax\$Species), paste(tax\$Genus, tax\$Species),
                     ifelse(!is.na(tax\$Genus) & is.na(tax\$Species), paste(tax\$Genus, 'spp.'),
@@ -50,9 +69,6 @@ process PHYLOSEQ_FIXTAXONOMY {
                     ifelse(!is.na(tax\$Kingdom) & is.na(tax\$Phylum), paste(tax\$Kingdom, 'spp.'),
                     ifelse(is.na(tax\$Kingdom), 'unclassified', NA))))))))
     tax\$ASV <- rownames(tax)
-
-    # Get unique taxonomy strings
-    unique(tax\$Tax)
 
     saveRDS(tax, file = "taxtable.RDS")
     """

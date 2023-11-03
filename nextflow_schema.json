@@ -336,20 +336,20 @@
             "type": "integer"
         },
         "skip_primers": {
-            "type": "string",
-            "default": "false"
+            "type": "boolean",
+            "default": false
         },
         "skip_rarefaction": {
-            "type": "string",
-            "default": "true"
+            "type": "boolean",
+            "default": true
         },
         "skip_rareprune": {
-            "type": "string",
-            "default": "true"
+            "type": "boolean",
+            "default": true
         },
         "skip_fixtaxonomy": {
-            "type": "string",
-            "default": "false"
+            "type": "boolean",
+            "default": false
         }
     }
 }

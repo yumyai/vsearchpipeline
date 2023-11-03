@@ -2,6 +2,7 @@ process VSEARCH_DEREPFULLLENGTH {
     tag "$meta.id"
     label 'process_single_low'
     label 'vsearch'
+    label 'error_retry'
 
     input:
     tuple val(meta), path(reads)

@@ -2,6 +2,7 @@ process VSEARCH_DEREPFULLLENGTHALL {
     //tag "$meta.id"
     label 'process_single_low'
     label 'vsearch'
+    label 'error_retry'
 
     input:
     path(reads)

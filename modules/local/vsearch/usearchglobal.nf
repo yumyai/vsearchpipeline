@@ -1,5 +1,5 @@
 process VSEARCH_USEARCHGLOBAL {
-    label 'process_multi_med'
+    label 'process_highcpu'
     label 'vsearch'
 
     input:

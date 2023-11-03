@@ -18,7 +18,7 @@ process PHYLOSEQ_RAREFACTION {
     def args = task.ext.args ?: ''
     def seed = task.ext.seed ?: '1234'
     def rarelevel = rarelevel ? "${rarelevel}" : 'NA'
-    def skipprune = skipprune ? 'TRUE' : 'FALSE'
+    def skipprune = prune ? 'TRUE' : 'FALSE'
 
     """
     #!/usr/bin/env Rscript

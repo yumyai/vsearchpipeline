@@ -85,10 +85,18 @@ workflow VSEARCHPIPELINE {
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
     INPUT_CHECK (
-        file(params.input),
-        file(params.primers)
+        file(params.input)
     )
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+    //
+    // SUBWORKFLOW: Read in samplesheet, validate and stage input files
+    //
+    if(!params.skip_primers){
+        PRIMERS_CHECK (
+        file(params.primers)
+        ).out.primers.first.set{ ch_primers }
+        ch_versions = ch_versions.mix(PRIMERS_CHECK.out.versions)
+    }
     //
     // MODULE: Run FastQC
     //
@@ -96,8 +104,6 @@ workflow VSEARCHPIPELINE {
         INPUT_CHECK.out.reads
     )
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
-    ch_primers = INPUT_CHECK.out.primers.first()
-
     //
     // MODULE:  Seqtk trim primers in fastq files
     //
@@ -230,7 +236,7 @@ workflow VSEARCHPIPELINE {
         PHYLOSEQ_RAREFACTION (
             PHYLOSEQ_MAKEOBJECT.out.phyloseq,
             params.rarelevel,
-            params.rareprune
+            params.skip_rareprune
         ).phyloseq.set{ ch_rarefied_phyloseq }
     } else {
         ch_rarefied_phyloseq = PHYLOSEQ_MAKEOBJECT.out.phyloseq

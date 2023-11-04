@@ -19,36 +19,32 @@
 6. Phyloseq object with count table, taxonomic table and phylogenetic tree ([`Phyloseq`](https://joey711.github.io/phyloseq/))
 7. MultiQC report ([`MultiQC`](http://multiqc.info/))
 
-
 ## Usage
 
-:::note
-If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how
+> [!NOTE]
+> If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how
 to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline)
 with `-profile test` before running the workflow on actual data.
-:::
 
 First, prepare a samplesheet with your input data that looks as follows:
 
-`samplesheet.csv`:
+`samplesheet.csv`
 
 ```csv
 sample,fastq_1,fastq_2
 CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
 ```
-
-Each row represents a pair of fastq files (paired end).
+Each row represents a pair of fastq files (paired-end).
 
 Then, prepare a sheet with the forward and reverse primers. This sheet should look as follows:
+
+`primers.csv`
 
 ```console
 forward_primer, reverse_primer
 CCTACGGGAGGCAGCAG,TACNVGGGTATCTAAKCC
 ```
-
 If there are no primers to be trimmed, simply add the `--skip_primers` flag to the nextflow run command. 
-
--->
 
 Now, you can run the pipeline using:
 
@@ -72,7 +68,6 @@ For more details and further functionality, please refer to the [usage documenta
 All output of the different parts of the pipeline are stored in subdirectories of the output directory. These directories are named after the tools that were used ('vsearch', 'dada2', etc.). In the phyloseq folder, you can find the end result of the pipeline, which is the phyloseq object. Other important outputs are the multiqc report in the multiqc folder and the execution html report in the pipeline_info folder.
 
 For more details on the pipeline output, please refer to the [output documentation](https://github.com/barbarahelena/vsearchpipeline/blob/master/docs/output.md).
-
 
 ## Credits
 

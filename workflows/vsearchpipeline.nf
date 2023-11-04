@@ -122,10 +122,10 @@ workflow VSEARCHPIPELINE {
     //
     VSEARCH_FASTQMERGEPAIRS (
         ch_trimmed_reads,
-        params.allowmergestagger,
-        params.maxdiffs,
-        params.minlength,
-        params.maxlength
+        params.merge_allowmergestagger,
+        params.merge_maxdiffs,
+        params.merge_minlen,
+        params.merge_maxlen
     )
 
     //
@@ -133,10 +133,10 @@ workflow VSEARCHPIPELINE {
     //
     VSEARCH_FASTQFILTER (
         VSEARCH_FASTQMERGEPAIRS.out.reads,
-        params.fastqmaxee,
-        params.fastawidth,
-        params.fastqmaxns 
-
+        params.filter_maxee,
+        params.filter_minlen,
+        params.filter_maxlen,
+        params.filter_maxns 
     )
     //
     // MODULE: VSEARCH dereplicate per sample
@@ -157,9 +157,9 @@ workflow VSEARCHPIPELINE {
     //
     VSEARCH_DEREPFULLLENGTHALL (
         fasta_files,
-        params.derep_strand_all,
-        params.derep_fastawidth_all,
-        params.derep_minunique_all
+        params.derep_all_strand,
+        params.derep_all_fastawidth,
+        params.derep_all_minunique
     )
     //
     // MODULE: VSEARCH cluster asvs
@@ -212,9 +212,9 @@ workflow VSEARCHPIPELINE {
         VSEARCH_UCHIMEDENOVO.out.asvs,
         SILVADATABASES.out.asvdb,
         SILVADATABASES.out.speciesdb,
-        params.dada2minboot,
-        params.dada2allowmultiple,
-        params.tryrevcompl
+        params.dada2_minboot,
+        params.dada2_allowmultiple,
+        params.dada2_tryrevcompl
     )
     ch_versions = ch_versions.mix(DADA2_ASSIGNTAXONOMY.out.versions)
 
@@ -236,7 +236,6 @@ workflow VSEARCHPIPELINE {
         PHYLOSEQ_RAREFACTION (
             PHYLOSEQ_MAKEOBJECT.out.phyloseq,
             params.rarelevel,
-            params.skip_rareprune
         ).phyloseq.set{ ch_rarefied_phyloseq }
     } else {
         ch_rarefied_phyloseq = PHYLOSEQ_MAKEOBJECT.out.phyloseq

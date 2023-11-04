@@ -7,7 +7,8 @@ process VSEARCH_FASTQFILTER {
     input:
     tuple val(meta), path(reads)
     val maxee
-    val width
+    val minlength
+    val maxlength
     val maxns
 
     output:
@@ -21,14 +22,19 @@ process VSEARCH_FASTQFILTER {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def filtered = "${prefix}.filtered.fasta"
+    def min = $minlength != 0 ? "--fastq_minlen ${minlength}" : ""
+    def max = $maxlength != 0 ? "--fastq_maxlen ${maxlength}" : ""
+    def maxns = $maxns ? "--fastq_maxns ${maxns}" : ""
 
     """
     vsearch \\
         --fastq_filter $reads \\
-        -fastq_maxee $maxee \\
-        -fastaout $filtered \\
-        --fasta_width $width \\
-        --fastq_maxns $maxns
+        --fastq_maxee $maxee \\
+        $min \\
+        $max \\
+        $maxns \\
+        --fasta_width 0 \\
+        -fastaout $filtered 
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -40,9 +46,9 @@ process VSEARCH_FASTQFILTER {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def filtered = "${prefix}.filtered.fasta"
-    def maxns = $maxns ?: "${maxns}" 
-    def width = $width ?: "${width}"
-    def maxee = $maxee ?: "${maxee}"
+    def min = $minlength != 0 ? "--fastq_minlen ${minlength}" : ""
+    def max = $maxlength != 0 ? "--fastq_maxlen ${maxlength}" : ""
+    def maxns = $maxns ? "--fastq_maxns ${maxns}" : ""
 
     """
     touch "${prefix}.filtered.fasta"

@@ -247,45 +247,51 @@
             "description": "Options for fastqmerge, fastqfilter, cluster_unoise, uchime and usearch_global processes",
             "default": "",
             "properties": {
-                "allowmergestagger": {
+                "merge_allowmergestagger": {
                     "type": "boolean",
                     "description": "Fastq merge process: : allow merging of staggered read pairs.",
                     "help_text": "When using --fastq_mergepairs, allow merging of staggered read pairs. Staggered pairs\nare pairs where the 3\u2019 end of the reverse read has an overhang to the left of the 5\u2019 end\nof the forward read. This situation can occur when a very short fragment is sequenced.\nThe 3\u2019 overhang of the reverse read is not included in the merged sequence. The oppo-\nsite option is the --fastq_nostagger option. The default is to discard staggered pairs.",
                     "fa_icon": "fas fa-hashtag"
                 },
-                "maxdiffs": {
+                "merge_maxdiffs": {
                     "type": "integer",
                     "default": 30,
                     "help_text": "When using --fastq_mergepairs, specify the maximum number of non-matching nu-\ncleotides allowed in the overlap region. That option has a strong influence on the merg-\ning success rate. The default value is 10.",
-                    "description": "Fastq merge process: Discard input sequences with less than the specified number of bases",
+                    "description": "Fastq merge process: Discard input sequences with more bases difference than specified",
                     "fa_icon": "fas fa-exchange-alt"
                 },
-                "minlength": {
+                "merge_minlen": {
                     "type": "integer",
-                    "description": "Fastq merge process: Discard input sequences with less than the specified number of bases",
+                    "description": "Fastq merge process: Discard input sequences shorter than the specified number of bases",
                     "fa_icon": "fas fa-ruler-horizontal"
                 },
-                "maxlength": {
+                "merge_maxlen": {
                     "type": "integer",
-                    "description": "Fastq merge process: Discard sequences with more than the specified number of bases",
+                    "description": "Fastq merge process: Discard sequences longer than the specified number of bases",
                     "fa_icon": "fas fa-ruler-vertical"
                 },
-                "fastqmaxee": {
+                "filter_maxee": {
                     "type": "integer",
                     "default": 1,
                     "description": "Filtering process: Discard sequences with an expected error greater than the specified number",
                     "fa_icon": "fas fa-times"
                 },
-                "fastawidth": {
-                    "type": "integer",
-                    "default": 0,
-                    "description": "Filtering process: Fasta files produced by vsearch are wrapped (sequences are written on lines of integer nucleotides, 80 by default). Set the value to zero to eliminate the wrapping",
-                    "fa_icon": "fas fa-arrows-alt-h"
-                },
-                "fastqmaxns": {
+                "filter_maxns": {
                     "type": "integer",
                     "default": 0,
                     "description": "Filtering process: Discard sequences with more than the specified number of N\u2019s.",
+                    "fa_icon": "fas fa-sort-numeric-down"
+                },
+                "filter_minlen": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Filtering process: Discard sequences shorter than the specified length.",
+                    "fa_icon": "fas fa-sort-numeric-down"
+                },
+                "filter_maxlen": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Filtering process: Discard sequences longer than the specified length.",
                     "fa_icon": "fas fa-sort-numeric-down"
                 },
                 "derep_strand": {
@@ -301,20 +307,20 @@
                     "description": "Dereplicate process:",
                     "fa_icon": "fas fa-arrows-alt-h"
                 },
-                "derep_strand_all": {
+                "derep_all_strand": {
                     "type": "string",
                     "default": "plus",
                     "description": "Dereplicate process all samples: plus or both strands",
                     "enum": ["plus", "both"],
                     "fa_icon": "fas fa-plus"
                 },
-                "derep_fastawidth_all": {
+                "derep_all_fastawidth": {
                     "type": "integer",
                     "default": 0,
                     "description": "Dereplicate process all samples:",
                     "fa_icon": "fas fa-arrows-alt-h"
                 },
-                "derep_minunique_all": {
+                "derep_all_minunique": {
                     "type": "integer",
                     "default": 2,
                     "description": "Dereplicate process all samples",
@@ -369,22 +375,22 @@
             "description": "Options for DADA2 assigntaxonomy and addspecies",
             "default": "",
             "properties": {
-                "dada2minboot": {
+                "dada2_minboot": {
                     "type": "integer",
                     "default": 80,
                     "description": "assignTaxonomy function: The minimum bootstrap confidence for assigning a taxonomic level.",
                     "fa_icon": "fas fa-terminal"
                 },
-                "dada2allowmultiple": {
+                "dada2_allowmultiple": {
                     "type": "integer",
                     "default": 3,
                     "description": "addSpecies function: maximum number of multiple assigned species. If 0, this will be set at FALSE.",
                     "fa_icon": "fas fa-cubes"
                 },
-                "tryrevcompl": {
+                "dada2_tryrevcompl": {
                     "type": "boolean",
                     "default": true,
-                    "description": "assignTaxonomy function: If TRUE, the reverse-complement of each sequences will be used for classification if it is a better match to the reference sequences than the forward sequence.",
+                    "description": "addSpecies function: If TRUE, the reverse-complement of each sequences will be used for classification if it is a better match to the reference sequences than the forward sequence.",
                     "fa_icon": "fas fa-arrow-left"
                 }
             },
@@ -398,6 +404,7 @@
             "properties": {
                 "rarelevel": {
                     "type": "integer",
+                    "default": 0,
                     "description": "Rarefaction level (not used if skip_rarefaction is not set at true)"
                 }
             },
@@ -417,11 +424,6 @@
                 "skip_rarefaction": {
                     "type": "boolean",
                     "description": "Skip rarefaction of phyloseq object",
-                    "fa_icon": "fas fa-forward"
-                },
-                "skip_rareprune": {
-                    "type": "boolean",
-                    "description": "Skip removal of empty or constant ASVs",
                     "fa_icon": "fas fa-forward"
                 },
                 "skip_fixtaxonomy": {

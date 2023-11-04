@@ -5,7 +5,6 @@ process PHYLOSEQ_RAREFACTION {
     input:
     path    phyloseq
     val     rarelevel
-    val     prune
 
     output:
     path "phyloseq_rarefied.RDS"    , emit: phyloseq
@@ -18,7 +17,6 @@ process PHYLOSEQ_RAREFACTION {
     def args = task.ext.args ?: ''
     def seed = task.ext.seed ?: '1234'
     def rarelevel = rarelevel ? "${rarelevel}" : 0
-    def skipprune = prune ? 'TRUE' : 'FALSE'
 
     """
     #!/usr/bin/env Rscript
@@ -57,6 +55,7 @@ process PHYLOSEQ_RAREFACTION {
     phylo_rare <- rarefy_even_depth(phylo, sample.size = rarelevel, 
                                     rngseed = $seed, replace = FALSE, 
                                     trimOTUs = TRUE, verbose = TRUE)
+    
     print(paste0('The phyloseq object has ', nsamples(phylo), ' samples and',
                  ntaxa(phylo), ' taxa.'))
 
@@ -65,18 +64,7 @@ process PHYLOSEQ_RAREFACTION {
         phylo_rare <- phylo
     }
 
-    ## Remove constant/empty ASVs
-        if($skipprune == FALSE){
-            print('Prune taxa to remove contant or empty ASVs.')
-            phylo_prune <- prune_taxa(taxa_sums(phylo_rare) > 0, phylo_rare)
-            print(paste0('The phyloseq object has ', nsamples(phylo_prune), ' samples and ',
-                ntaxa(phylo_prune), ' taxa.'))
-        } else {
-            print('No pruning was performed.')
-            phylo_prune <- phylo_rare
-        }
-
-    saveRDS(phylo_prune, 'phyloseq_rarefied.RDS')
+    saveRDS(phylo_rare, 'phyloseq_rarefied.RDS')
     """
 
     stub:

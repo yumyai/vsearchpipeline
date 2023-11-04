@@ -83,9 +83,8 @@ If you wish to repeatedly use the same parameters for multiple runs, rather than
 
 Pipeline settings can be provided in a `yaml` or `json` file via `-params-file <file>`.
 
-:::warning
-Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
-:::
+> [!WARNING]
+> Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
 
 The above pipeline run specified with a params file in yaml format:
 
@@ -105,10 +104,16 @@ outdir: './results/'
 You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
 
 ### HPC settings
-I had some problems getting Nextflow pipelines to work on an HPC. This is a short list of issues I encountered with solutions.
+I had some problems getting Nextflow pipelines to work on an HPC. This is a short list of issues I encountered with solutions. These solutions are all implemented, although for slurm use and the job name replacement you have to use `-profile snellius`. 
+
+#### Use singularity
+Docker usually does not work on HPCs for security reasons; the alternative is Singularity (or Apptainer). Run the pipeline with `-profile singularity`. If you use `-profile snellius`, singularity is also enabled.
+
+#### Retry failed jobs
+Because slurm jobs might occasionally fail, some processes have the `error_retry` label. With this label, jobs are retried 5 times before the pipeline fails. This is already implemented in the pipeline.
 
 #### Use slurm
-If you're using a scheduler on a computing cluster, you should define that in the process scope of the `conf/base.config` file. The queue size and rate limit of job submissions are also defined.
+If you're using a scheduler on a computing cluster, you should define that in the process scope configuration file. The queue size and rate limit of job submissions are also defined. The configs below are used in the `-profile snellius` but with a specified partition name. Make sure you replace the partition name when using this profile on other computing clusters.
 ```
 process{
     executor = 'slurm'
@@ -118,7 +123,7 @@ process{
 }
 ```
 #### Job names with special characters
-On some HPCs (like the one I use), certain characters such as parentheses and columns are not allowed in the slurm job names. The code below can be added to the `conf/base.config` file to replace these characters by underscores.
+On some HPCs, certain characters such as parentheses and columns are not allowed in the slurm job names. The configs below are used in the `-profile snellius`.
 ```
 executor{
     jobName = {
@@ -126,11 +131,6 @@ executor{
     }
 }
 ```
-#### Use singularity
-Docker usually does not work on HPCs for security reasons; the alternative is Singularity (or Apptainer). Run the pipeline with `-profile singularity`.
-
-#### Retry failed jobs
-Because slurm jobs might occasionally fail, some processes have the `error_retry` label. With this label, jobs are retried 5 times before the pipeline fails.
 
 ### Updating the pipeline
 
@@ -183,6 +183,8 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
   - A generic configuration profile to be used with [Apptainer](https://apptainer.org/)
 - `conda`
   - A generic configuration profile to be used with [Conda](https://conda.io/docs/). Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter, Charliecloud, or Apptainer.
+- `snellius`
+  - A configuration specific for the ['Snellius HPC'](). It uses the settings described in the paragraph about ['HPC settings'](#hpc-settings). In short: singularity, slurm configuration and job name configuration. You can use this profile for other HPCs but you should replace the name of the partition where jobs are submitted to.
 
 ### `-resume`
 

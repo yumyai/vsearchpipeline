@@ -2,11 +2,8 @@
 
 ## Introduction
 
-This document describes the output produced by the pipeline. Most of the plots are taken from the MultiQC report, which summarises results at the end of the pipeline.
+This document describes the output produced by the pipeline. The directories listed below will be created in the results directory after the pipeline has finished. All paths are relative to the top-level results directory.
 
-The directories listed below will be created in the results directory after the pipeline has finished. All paths are relative to the top-level results directory.
-
-<!-- TODO nf-core: Write this documentation describing your workflow's output -->
 
 ## Pipeline overview
 
@@ -15,22 +12,23 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - [FastQC](#fastqc) - Raw read QC
 - [Seqtk](#seqtk) - Trim primers
 - [VSEARCH](#vsearch) - make ASV fasta and count table
-  - [fastqmerge](#fastqmerge) - Merge forward and reverse reads
-  - [fastqfilter](#fastqfilter) - Filter reads
-  - [dereplicate sample](#derepsample) - Dereplicate reads per sample
-  - [dereplicate all](#derepall) - Dereplicate all reads
-  - [cluster_unoise](#cluster) - Cluster reads into ASVs
-  - [uchime_denovo](#uchime) - Remove chimeras with uchime_denovo method
-  - [usearch_global](#usearch) - Make count table from ASVs and dereplicated reads
+  - [fastqmerge](#vsearch) - Merge forward and reverse reads
+  - [fastqfilter](#vsearch) - Filter reads
+  - [dereplicate sample](#vsearch) - Dereplicate reads per sample
+  - [dereplicate all](#vsearch) - Dereplicate all reads
+  - [cluster_unoise](#vsearch) - Cluster reads into ASVs
+  - [uchime_denovo](#vsearch) - Remove chimeras with uchime_denovo method
+  - [usearch_global](#vsearch) - Make count table from ASVs and dereplicated reads
 - [MAFFT](#mafft) - Multiple sequence alignment of ASVs
-- [VeryFastTree](#vft) - Make phylogenetic tree of multiple sequence alignment
-- [DADA2 taxonomy](#dada2) - Assign taxonomy to ASVs and add species using SILVA v138.1 database
+- [VeryFastTree](#veryfasttree) - Make phylogenetic tree of multiple sequence alignment
+- [DADA2 taxonomic assignment](#dada2-taxonomic-assignment) - Assign taxonomy to ASVs and add species using SILVA v138.1 database
 - [Phyloseq](#phyloseq) - Process data in phyloseq objects
-  - [Make object](#phyloobject) - Make phyloseq object out of count table, tax table and tree
-  - [Rarefaction](#rarefaction) - Rarefy and prune taxa (experimental feature)
-  - [Nicer taxonomy](#taxonomy) - Make 'nice' taxonomic names from different columns depending on known phylogenetic levels
+  - [Make phyloseq object](#make-phyloseq-object) - Make phyloseq object out of count table, tax table and tree
+  - [Rarefaction](#rarefaction) - Rarefy count table (experimental feature)
+  - [Nicer taxonomy](#nicer-taxonomy) - Make 'nice' taxonomic names from different columns depending on known phylogenetic levels
 - [MultiQC](#multiqc) - Aggregate report describing results and QC from the whole pipeline
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
+
 
 ### FastQC
 
@@ -51,9 +49,8 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 
 ![MultiQC - FastQC adapter content plot](images/mqc_fastqc_adapter.png)
 
-:::note
-The FastQC plots displayed in the MultiQC report shows _untrimmed_ reads. They may contain adapter sequence and potentially regions with low quality.
-:::
+> [!NOTE]
+> The FastQC plots displayed in the MultiQC report shows _untrimmed_ reads. They may contain adapter sequence and potentially regions with low quality.
 
 ### Seqtk
 
@@ -65,9 +62,101 @@ The FastQC plots displayed in the MultiQC report shows _untrimmed_ reads. They m
 
 </details>
 
-[Seqtk]() trims the forward and reverse reads. In this process, the length of the primers is 
+[Seqtk]() trims the forward and reverse reads. In this process, the length of the primers is trimmed off of the corresponding (forward or reverse) fastq file.
 
-### 
+### VSEARCH
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `vsearch/`
+  - `*.merged.fastq.gz`: 
+  - `*.filtered.fasta`: 
+  - `*.derep.fasta`: 
+  - `all.concat.fasta`:
+  - `all.derep.fasta`:
+  - `asvs.clustered.fasta`
+  - `asvs_nonchimeras.fasta`:
+  - `chimeras.fasta`:
+  - `count_table.txt`:
+
+</details>
+
+In a series of seven [VSEARCH](https://github.com/torognes/vsearch/wiki/VSEARCH-pipeline) processes, the forward and reverse reads are translated into an ASV set and count table. 
+
+First, the reads are merged using `fastq_merge` (default maxdiffs 30, no minlen or maxlen setting), so that there is one fasta file per sample left. Next, `fastq_filter` is used to filter the reads (default maxee = 1 and maxns = 1, no minlen or maxlen filter), resulting in a filtered fasta file per sample. 
+
+Samples are then dereplicated per sample, resulting in a dereplicated fasta per sample. All dereplicated reads are then combined in one channel (`all.concat.fasta`) to be dereplicated again (default minunique=2), resulting in `all.derep.fasta`. This dereplicating process is done twice since the dereplication is more efficient if first performed at sample-level.
+
+The `cluster_unoise` function is used to denoise fasta sequences with the defaults for minsize (8) and alpha (2) as defined by VSEARCH itself, resulting in `asvs.clustered.fasta`. Chimeras are removed using the `uchime3_denovo` method that uses the UNOISE version 3 algorithm by Robert Edgar. Both chimeras that are filtered out (`chimeras.fasta`) and ASVs without chimeras (`asvs_nonchimeras.fasta`), labelled with `ASV_` followed by a number, are saved. Using global pairwise alignment with `usearch_global`, target sequences `all.derep.fasta` are compared to `asv_nonchimeras.fasta`.
+
+### MAFFT
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `mafft/`
+  - `asvs.msa`: multiple sequence alignment of the ASV sequences
+
+</details>
+
+[MAFFT](https://mafft.cbrc.jp/alignment/software/) is a tool for multiple sequence alignment (msa). We need the msa to make a phylogenetic tree.
+
+### VeryFastTree
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `veryfasttree/`
+  - `asvs.msa.tree`: phylogenetic tree of ASVs
+
+</details>
+
+[VeryFastTree](https://github.com/citiususc/veryfasttree) is a tool for inferring a phylogenetic tree. It is used by default with double precision in this pipeline. It is much faster than FastTree-2, as also described in the documentation.
+
+### DADA2: taxonomic assignment
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `dada2/`
+  - `taxtable.csv`: taxonomy table
+
+</details>
+
+[DADA2](https://benjjneb.github.io/dada2/) is used for taxonomic assignment. In this process, we use the `assignTaxonomy` (minBoot=80) and `addSpecies` (allowmultiple=3 and tryrevcompl=true) functions using [SILVA v.138.1 ASVs and species databases for DADA2](https://zenodo.org/records/4587955). The resulting taxonomy table is saved as csv.
+
+### Phyloseq
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `phyloseq/`
+  - `phyloseq.RDS`: phyloseq object of count table, tax table and tree
+  - `phyloseq_rarefied.RDS`: this is a rarefied phyloseq object
+  - `rarehist.pdf`: histogram of of counts per sample
+  - `rarahist_log.pdf`: histogram of counts per sample, log10-transformed
+  - `discarded_samples.csv`: samples that were discarded during rarefaction and their counts
+  - `taxtable.RDS`: taxtable with assembled taxonomy in the last column in RDS format
+  - `phylogen_levels.csv`: this table shows the phylogenetic levels known as a percentage of all ASVs
+  - `phylogen_levels_top300.csv`: this table shows the phylogenetic levels known as a percentage of the top 300 most abundant ASVs
+
+</details>
+
+#### Make phyloseq object
+[Phyloseq](https://joey711.github.io/phyloseq/index.html) is an R package for handling 16S data. The different dimensions of the data can be stored in one phyloseq object, in this case `phyloseq.RDS`. 
+
+#### Rarefaction
+As an optional feature, this pipeline also has a process to rarefy data. It's however better to do this separately after inspecting the data carefully. The rules this process now uses for determining the rarefaction level are as follows:
+- Rarefaction level as defined by `rarelevel` parameter, if set; otherwise,
+- Mean - 2SDs: if that is >15000; 
+- Median - IQR: if that is >15000; 
+- 15000.
+Empty ASVs are trimmed from the dataset after this procedure. The rarefied phyloseq is saved as `phyloseq_rarefied.RDS`. The plots with the distribution of sample counts are saved as `rarehist.pdf` and `rarehist_log.pdf`. The samples that were discarded because of the rarefaction and their counts are saved in `discarded_samples.csv`.
+
+#### Nicer taxonomy
+The process in which the taxonomy levels are made into one taxonomy name for publication (e.g. 'Roseburia hominis' or 'Roseburia spp.') are saved in `taxtable.RDS`. The known phylogenetic levels for all ASVs and the top 300 most abundant ASVs are saved in `phylogen_levels.csv` and `phylogen_levels_top300.csv`, respectively.
+
 
 ### MultiQC
 

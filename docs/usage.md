@@ -105,15 +105,39 @@ outdir: './results/'
 You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
 
 ### HPC settings
+I had some problems getting Nextflow pipelines to work on an HPC. This is a short list of issues I encountered with solutions.
 
+#### Use slurm
+If you're using a scheduler on a computing cluster, you should define that in the process scope of the `conf/base.config` file. The queue size and rate limit of job submissions are also defined.
+```
+process{
+    executor = 'slurm'
+    clusterOptions = '-p partitionname'
+    queueSize = 50
+	  submitRateLimit = '10 sec'
+}
+```
+#### Job names with special characters
+On some HPCs (like the one I use), certain characters such as parentheses and columns are not allowed in the slurm job names. The code below can be added to the `conf/base.config` file to replace these characters by underscores.
+```
+executor{
+    jobName = {
+        n = "${task.name}" -> n.replaceAll( '[():\\s]', '_')
+    }
+}
+```
+#### Use singularity
+Docker usually does not work on HPCs for security reasons; the alternative is Singularity (or Apptainer). Run the pipeline with `-profile singularity`.
 
+#### Retry failed jobs
+Because slurm jobs might occasionally fail, some processes have the `error_retry` label. With this label, jobs are retried 5 times before the pipeline fails.
 
 ### Updating the pipeline
 
 To make sure that you're running the latest version of the pipeline, make sure that you regularly clone the git repository of the pipeline:
 
 ```bash
-git clone barbarahelena/vsearchpipeline
+git clone git@github.com:barbarahelena/vsearchpipeline.git
 ```
 
 ### Reproducibility
@@ -124,25 +148,22 @@ This version number will be logged in reports when you run the pipeline, so that
 
 To further assist in reproducbility, you can use share and re-use [parameter files](#running-the-pipeline) to repeat pipeline runs with the same settings without having to write out a command with every single parameter.
 
-:::tip
-If you wish to share such profile (such as upload as supplementary material for academic publications), make sure to NOT include cluster specific paths to files, nor institutional specific profiles.
-:::
+> [!NOTE] 
+> If you wish to share such profile (such as upload as supplementary material for academic publications), make sure to NOT include cluster specific paths to files, nor institutional specific profiles.
 
 ## Core Nextflow arguments
 
-:::note
-These options are part of Nextflow and use a _single_ hyphen (pipeline parameters use a double-hyphen).
-:::
+> [!NOTE] 
+> These options are part of Nextflow and use a _single_ hyphen (pipeline parameters use a double-hyphen).
 
 ### `-profile`
 
 Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments.
 
-Several generic profiles are bundled with the pipeline which instruct the pipeline to use software packaged using different methods (Docker, Singularity, Podman, Shifter, Charliecloud, Apptainer, Conda) - see below.
+Several generic profiles are bundled with the pipeline which instruct the pipeline to use software packaged using different methods (Docker, Singularity, Apptainer, Conda) - see below.
 
-:::info
-We highly recommend the use of Docker or Singularity containers for full pipeline reproducibility, however when this is not possible, Conda is also supported.
-:::
+> [!IMPORTANT] 
+> We highly recommend the use of Docker or Singularity containers for full pipeline reproducibility, however when this is not possible, Conda is also supported.
 
 The pipeline also dynamically loads configurations from [https://github.com/nf-core/configs](https://github.com/nf-core/configs) when it runs, making multiple config profiles for various institutional clusters available at run time. For more information and to see if your system is available in these configs please see the [nf-core/configs documentation](https://github.com/nf-core/configs#documentation).
 
@@ -158,12 +179,6 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
   - A generic configuration profile to be used with [Docker](https://docker.com/)
 - `singularity`
   - A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
-- `podman`
-  - A generic configuration profile to be used with [Podman](https://podman.io/)
-- `shifter`
-  - A generic configuration profile to be used with [Shifter](https://nersc.gitlab.io/development/shifter/how-to-use/)
-- `charliecloud`
-  - A generic configuration profile to be used with [Charliecloud](https://hpc.github.io/charliecloud/)
 - `apptainer`
   - A generic configuration profile to be used with [Apptainer](https://apptainer.org/)
 - `conda`

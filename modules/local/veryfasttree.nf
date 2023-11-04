@@ -1,11 +1,10 @@
 process VERYFASTTREE {
-    //tag '$bam'
-    label 'process_low'
+    label 'process_single_low'
 
-    conda "bioconda::veryfasttree=4.0.03"
+    conda "bioconda::veryfasttree=4.0.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/veryfasttree:3.1.1--h9f5acd7_1':
-        'biocontainers/veryfasttree:4.0.03--h4ac6f70_0' }"
+        'https://depot.galaxyproject.org/singularity/veryfasttree:4.0.2':
+        'biocontainers/veryfasttree:4.0.2' }"
 
     input:
     path msa
@@ -41,8 +40,7 @@ process VERYFASTTREE {
     def args = task.ext.args ?: ''
     
     """
-    touch asvs.msa.treefile
-    touch tree.tre
+    touch asvs.msa.tree
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

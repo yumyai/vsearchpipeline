@@ -14,7 +14,7 @@
 1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 2. Trim primers ([`Seqtk`](https://github.com/lh3/seqtk))
 3. Infer ASVs and make count table ([`VSEARCH`](https://github.com/torognes/vsearch))
-4. Multiple sequence alignment ([`MAFFT`]()) to make phylogenetic tree (['VeryFastTree'](https://github.com/citiususc/veryfasttree))
+4. Multiple sequence alignment ([`MAFFT`]()) to make phylogenetic tree ([`VeryFastTree`](https://github.com/citiususc/veryfasttree))
 5. Taxonomic assignment ([`DADA2`](https://benjjneb.github.io/dada2/)) using SILVA 138.1 database for DADA2
 6. Phyloseq object with count table, taxonomic table and phylogenetic tree ([`Phyloseq`](https://joey711.github.io/phyloseq/))
 7. MultiQC report ([`MultiQC`](http://multiqc.info/))

@@ -44,7 +44,7 @@ process VERYFASTTREE {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        veryfasttree: \$(veryfasttree --version 2>&1 | sed 's/^v//' | sed 's/ (.*)//')
+        veryfasttree: \$(VeryFastTree -help 2>&1 | head -n 1 | sed -n 's/.*\\([0-9]\\+\\.[0-9]\\+\\.[0-9]\\+\\).*/\\1/p')
     END_VERSIONS
     """
 }

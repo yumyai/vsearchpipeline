@@ -4,7 +4,7 @@
 
 include { PRIMERSHEET_CHECK } from '../../modules/local/primersheet_check'
 
-workflow PRIMER_CHECK {
+workflow PRIMERS_CHECK {
     take:
     primersheet
 

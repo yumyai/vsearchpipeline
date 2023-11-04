@@ -55,7 +55,7 @@ include { PHYLOSEQ_FIXTAXONOMY }        from '../modules/local/phyloseq/fixtaxon
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
-
+include { PRIMERS_CHECK } from '../subworkflows/local/primers_check'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
@@ -93,8 +93,9 @@ workflow VSEARCHPIPELINE {
     //
     if(!params.skip_primers){
         PRIMERS_CHECK (
-        file(params.primers)
-        ).out.primers.first.set{ ch_primers }
+            file(params.primers)
+        )
+        ch_primers = PRIMERS_CHECK.out.primers.first()
         ch_versions = ch_versions.mix(PRIMERS_CHECK.out.versions)
     }
     //

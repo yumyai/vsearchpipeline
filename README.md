@@ -11,24 +11,16 @@
 
 ## Introduction
 
-**nf-core/vsearchpipeline** is a bioinformatics pipeline that ...
-
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
-
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/contributing/design_guidelines#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
+**vsearchpipeline** is a bioinformatics pipeline that uses VSEARCH to infer ASVs and make a count table from 16S sequencing reads. The input is a samplesheet with sample names and file paths to the fastq files, and a sheet with primer sequences if primer trimming is necessary. The pipeline uses DADA2 for taxonomic assignment (as opposed to VSEARCH sintax) using the SILVA v.138.1 database. The resulting count table, taxonomic table and phylogenetic tree resulting from the pipeline are stored in a phyloseq object.
 
 1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
-3.
-4.
-5.
-6.
+2. Trim primers (['Seqtk'](https://github.com/lh3/seqtk))
+3. Infer ASVs and make count table (['VSEARCH'](https://github.com/torognes/vsearch))
+4. Multiple sequence alignment (['MAFFT']()) to make phylogenetic tree (['VeryFastTree'](https://github.com/citiususc/veryfasttree))
+5. Taxonomic assignment (['DADA2'](https://benjjneb.github.io/dada2/)) using SILVA 138.1 database for DADA2
+6. Phyloseq object with count table, taxonomic table and phylogenetic tree (['Phyloseq'](https://joey711.github.io/phyloseq/))
+7. MultiQC report ([`MultiQC`](http://multiqc.info/))
+
 
 ## Usage
 
@@ -49,12 +41,14 @@ CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
 
 Each row represents a pair of fastq files (paired end).
 
-Then, prepare a sheet with the forward and reverse primers. This sheet should as follows:
+Then, prepare a sheet with the forward and reverse primers. This sheet should look as follows:
 
+```console
+forward_primer, reverse_primer
+CCTACGGGAGGCAGCAG,TACNVGGGTATCTAAKCC
+```
 
-
-
-If there are no primers to be trimmed, simply add the `--skip_primers` flag to the command. 
+If there are no primers to be trimmed, simply add the `--skip_primers` flag to the nextflow run command. 
 
 -->
 
@@ -74,47 +68,18 @@ provided by the `-c` Nextflow option can be used to provide any configuration _*
 see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
 :::
 
-For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/vsearchpipeline/usage) and the [parameter documentation](https://nf-co.re/vsearchpipeline/parameters).
-
-| Group                      | Property                | Type     | Description                                            | Default Value | Required |
-|----------------------------|-------------------------|----------|--------------------------------------------------------|---------------|----------|
-| Input/output options       | input                   | string   | Path to comma-separated file containing information about the samples in the experiment. | -            | *        |
-|                            | primers                 | string   | Path to comma-separated file containing forward_primer and reverse_primer sequences. | -            |          |
-|                            | outdir                  | string   | The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure. | -            | *        |
-|                            | email                   | string   | Email address for completion summary.                  | -            |          |
-|                            | multiqc_title           | string   | MultiQC report title. Printed as page header, used for filename if not otherwise specified. | -            |          |
-| VSEARCH options             | allowmergestagger       | boolean  | Fastq merge process: allow merging of staggered read pairs. | -            |          |
-|                            | maxdiffs                | integer  | Fastq merge process: specify the maximum number of non-matching nucleotides allowed in the overlap region. | 10           |          |
-|                            | minlength               | integer  | Fastq merge process: discard input sequences with less than the specified number of bases. | -            |          |
-|                            | maxlength               | integer  | Fastq merge process: discard sequences with more than the specified number of bases. | -            |          |
-|                            | fastqmaxee              | integer  | Filtering process: discard sequences with an expected error greater than the specified number. | 1            |          |
-|                            | fastawidth              | integer  | Filtering process: Fasta files produced by vsearch are wrapped. | 0            |          |
-|                            | fastqmaxns              | integer  | Filtering process: discard sequences with more than the specified number of N’s. | 0            |          |
-|                            | derep_strand            | string   | Dereplicate process: plus or both strands. | plus         |          |
-|                            | derep_fastawidth        | integer  | Dereplicate process.                                   | 0            |          |
-|                            | derep_strand_all        | string   | Dereplicate process all samples: plus or both strands. | plus         |          |
-|                            | derep_fastawidth_all    | integer  | Dereplicate process all samples. | 0            |          |
-|                            | derep_minunique_all     | integer  | Dereplicate process all samples. | 2            |          |
-|                            | cluster_minsize         | integer  | Clustering.                                            | 8            |          |
-|                            | cluster_alpha           | integer  | Clustering.                                            | 2            |          |
-|                            | uchime_label            | string   | Chimera removal: labeling (prefix) of ASVs. | ASV_         |          |
-|                            | usearch_id              | number   | Usearch global: id parameter. | 0.97         |          |
-| Tree options                | tree_doubleprecision     | boolean  | VeryFastTree with double precision. | true         |          |
-| DADA2 options               | dada2minboot            | integer  | assignTaxonomy function: The minimum bootstrap confidence for assigning a taxonomic level. | 80           |          |
-|                            | dada2allowmultiple      | integer  | addSpecies function: maximum number of multiple assigned species. | 3            |          |
-|                            | tryrevcompl             | boolean  | assignTaxonomy function: If TRUE, the reverse-complement of each sequence will be used for classification if it is a better match to the reference sequences than the forward sequence. | -            |          |
-| Phyloseq options            | rarelevel               | integer  | Rarefaction level (not used if skip_rarefaction is not set at true) | -            |          |
-| Generic options             | help                    | boolean  | Display help text. | -            |          |
-|                            | version                 | boolean  | Display version and exit. | -            |          |
+For more details and further functionality, please refer to the [usage documentation](https://github.com/barbarahelena/vsearchpipeline/blob/master/docs/usage.md) and the [parameter documentation](https://github.com/barbarahelena/vsearchpipeline/blob/master/docs/parameters.md).
 
 
 ## Pipeline output
+All output of the different parts of the pipeline are stored in subdirectories of the output directory. These directories are named after the tools that were used ('vsearch', 'dada2', etc.). In the phyloseq folder, you can find the end result of the pipeline, which is the phyloseq object. Other important outputs are the multiqc report in the multiqc folder and the execution html report in the pipeline_info folder.
 
+For more details on the pipeline output, please refer to the [output documentation](https://github.com/barbarahelena/vsearchpipeline/blob/master/docs/output.md).
 
 
 ## Credits
 
-I used the nf-core template for this pipeline.
+This pipeline uses the nf-core template (as much as possible).
 
 ## Citations
 

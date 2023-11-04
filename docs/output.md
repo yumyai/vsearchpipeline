@@ -13,6 +13,22 @@ The directories listed below will be created in the results directory after the 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
 
 - [FastQC](#fastqc) - Raw read QC
+- [Seqtk](#seqtk) - Trim primers
+- [VSEARCH](#vsearch) - make ASV fasta and count table
+  - [fastqmerge](#fastqmerge) - Merge forward and reverse reads
+  - [fastqfilter](#fastqfilter) - Filter reads
+  - [dereplicate sample](#derepsample) - Dereplicate reads per sample
+  - [dereplicate all](#derepall) - Dereplicate all reads
+  - [cluster_unoise](#cluster) - Cluster reads into ASVs
+  - [uchime_denovo](#uchime) - Remove chimeras with uchime_denovo method
+  - [usearch_global](#usearch) - Make count table from ASVs and dereplicated reads
+- [MAFFT](#mafft) - Multiple sequence alignment of ASVs
+- [VeryFastTree](#vft) - Make phylogenetic tree of multiple sequence alignment
+- [DADA2 taxonomy](#dada2) - Assign taxonomy to ASVs and add species using SILVA v138.1 database
+- [Phyloseq](#phyloseq) - Process data in phyloseq objects
+  - [Make object](#phyloobject) - Make phyloseq object out of count table, tax table and tree
+  - [Rarefaction](#rarefaction) - Rarefy and prune taxa (experimental feature)
+  - [Nicer taxonomy](#taxonomy) - Make 'nice' taxonomic names from different columns depending on known phylogenetic levels
 - [MultiQC](#multiqc) - Aggregate report describing results and QC from the whole pipeline
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
 
@@ -38,6 +54,20 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 :::note
 The FastQC plots displayed in the MultiQC report shows _untrimmed_ reads. They may contain adapter sequence and potentially regions with low quality.
 :::
+
+### Seqtk
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `seqtk/`
+  - `*.trim.fastq.gz`: Trimmed reads. 
+
+</details>
+
+[Seqtk]() trims the forward and reverse reads. In this process, the length of the primers is 
+
+### 
 
 ### MultiQC
 

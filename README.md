@@ -1,7 +1,5 @@
 # VSEARCH nextflow pipeline 
 
-[![GitHub Actions CI Status](https://github.com/nf-core/vsearchpipeline/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/vsearchpipeline/actions?query=workflow%3A%22nf-core+CI%22)
-[![GitHub Actions Linting Status](https://github.com/nf-core/vsearchpipeline/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/vsearchpipeline/actions?query=workflow%3A%22nf-core+linting%22)
 [![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
 
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A523.04.0-23aa62.svg)](https://www.nextflow.io/)
@@ -14,11 +12,11 @@
 **vsearchpipeline** is a bioinformatics pipeline that uses VSEARCH to infer ASVs and make a count table from 16S sequencing reads. The input is a samplesheet with sample names and file paths to the fastq files, and a sheet with primer sequences if primer trimming is necessary. The pipeline uses DADA2 for taxonomic assignment (as opposed to VSEARCH sintax) using the SILVA v.138.1 database. The resulting count table, taxonomic table and phylogenetic tree resulting from the pipeline are stored in a phyloseq object.
 
 1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Trim primers (['Seqtk'](https://github.com/lh3/seqtk))
-3. Infer ASVs and make count table (['VSEARCH'](https://github.com/torognes/vsearch))
-4. Multiple sequence alignment (['MAFFT']()) to make phylogenetic tree (['VeryFastTree'](https://github.com/citiususc/veryfasttree))
-5. Taxonomic assignment (['DADA2'](https://benjjneb.github.io/dada2/)) using SILVA 138.1 database for DADA2
-6. Phyloseq object with count table, taxonomic table and phylogenetic tree (['Phyloseq'](https://joey711.github.io/phyloseq/))
+2. Trim primers ([`Seqtk`](https://github.com/lh3/seqtk))
+3. Infer ASVs and make count table ([`VSEARCH`](https://github.com/torognes/vsearch))
+4. Multiple sequence alignment ([`MAFFT`]()) to make phylogenetic tree (['VeryFastTree'](https://github.com/citiususc/veryfasttree))
+5. Taxonomic assignment ([`DADA2`](https://benjjneb.github.io/dada2/)) using SILVA 138.1 database for DADA2
+6. Phyloseq object with count table, taxonomic table and phylogenetic tree ([`Phyloseq`](https://joey711.github.io/phyloseq/))
 7. MultiQC report ([`MultiQC`](http://multiqc.info/))
 
 

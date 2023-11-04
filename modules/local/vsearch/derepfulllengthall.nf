@@ -11,7 +11,7 @@ process VSEARCH_DEREPFULLLENGTHALL {
     val minunique
 
     output:
-    path("all.concat.fasta") , emit: concatreads
+    path("all.concat.fastq") , emit: concatreads
     path("all.derep.fasta")  , emit: reads
     path "versions.yml"      , emit: versions
     
@@ -22,11 +22,11 @@ process VSEARCH_DEREPFULLLENGTHALL {
     def args = task.ext.args ?: ''
 
     """
-    cat $reads > all.concat.fasta
+    cat $reads > all.concat.fastq
     
     vsearch \\
-        --derep_fulllength all.concat.fasta\\
-        --output all.derep.fasta \\
+        --fastx_uniques all.concat.fastq \\
+        --fastaout all.derep.fasta \\
         --strand $strand \\
         --sizein \\
         --sizeout \\

@@ -1,5 +1,4 @@
 process MAFFT {
-    //tag '$bam'
     label 'process_single_low'
     conda "bioconda::mafft=7.520"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?

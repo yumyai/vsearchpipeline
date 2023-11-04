@@ -301,12 +301,6 @@
                     "enum": ["plus", "both"],
                     "fa_icon": "fas fa-plus"
                 },
-                "derep_fastawidth": {
-                    "type": "integer",
-                    "default": 0,
-                    "description": "Dereplicate process:",
-                    "fa_icon": "fas fa-arrows-alt-h"
-                },
                 "derep_all_strand": {
                     "type": "string",
                     "default": "plus",

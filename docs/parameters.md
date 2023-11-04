@@ -16,10 +16,10 @@
 |                          | filter_minlen          | integer   | Filtering process: Discard sequences shorter than the specified length. | 0             |          |
 |                          | filter_maxlen          | integer   | Filtering process: Discard sequences longer than the specified length. | 0             |          |
 |                          | derep_strand           | string    | Dereplicate process: plus or both strands.                   | plus          |          |
-|                          | derep_fastawidth       | integer   | Dereplicate process:                                         | 0             |          |
 |                          | derep_all_strand       | string    | Dereplicate process all samples: plus or both strands.     | plus          |          |
-|                          | derep_all_fastawidth   | integer   | Dereplicate process all samples.                             | 0             |          |
-|                          | derep_all_minunique    | integer   | Dereplicate process all samples.                             | 2             |          |
+|                          | derep_all_fastawidth   | integer   | Dereplicate process all samples (output fasta): Fasta files produced by vsearch are wrapped (sequences are written on lines of integer
+nucleotides, 80 by default). Set the value to zero to eliminate the wrapping.| 0             |          |
+|                          | derep_all_minunique    | integer   | Dereplicate process all samples: minimum number of sequences to be defined as unique                             | 2             |          |
 |                          | cluster_minsize        | integer   | Clustering.                                                  | 8             |          |
 |                          | cluster_alpha          | integer   | Clustering.                                                  | 2             |          |
 |                          | uchime_label           | string    | Chimera removal: labeling (prefix) of ASVs.                  | ASV_          |          |

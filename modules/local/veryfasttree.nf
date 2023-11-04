@@ -3,8 +3,8 @@ process VERYFASTTREE {
 
     conda "bioconda::veryfasttree=4.0.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/veryfasttree:4.0.2':
-        'biocontainers/veryfasttree:4.0.2' }"
+        'https://depot.galaxyproject.org/singularity/veryfasttree:4.0.2--h4ac6f70_0':
+        'docker pull quay.io/biocontainers/veryfasttree:4.0.2--h4ac6f70_0' }"
 
     input:
     path msa

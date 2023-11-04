@@ -12,7 +12,7 @@ process VSEARCH_FASTQFILTER {
     val maxns
 
     output:
-    tuple val(meta), path("*.filtered.fasta")   , emit: reads
+    tuple val(meta), path("*.filtered.fastq")   , emit: reads
     path "versions.yml"                         , emit: versions
 
     when:
@@ -21,10 +21,10 @@ process VSEARCH_FASTQFILTER {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def filtered = "${prefix}.filtered.fasta"
-    def min = $minlength != 0 ? "--fastq_minlen ${minlength}" : ""
-    def max = $maxlength != 0 ? "--fastq_maxlen ${maxlength}" : ""
-    def maxns = $maxns ? "--fastq_maxns ${maxns}" : ""
+    def filtered = "${prefix}.filtered.fastq"
+    def min = minlength != 0 ? "--fastq_minlen ${minlength}" : ""
+    def max = maxlength != 0 ? "--fastq_maxlen ${maxlength}" : ""
+    def maxns = maxns ? "--fastq_maxns ${maxns}" : ""
 
     """
     vsearch \\
@@ -33,8 +33,7 @@ process VSEARCH_FASTQFILTER {
         $min \\
         $max \\
         $maxns \\
-        --fasta_width 0 \\
-        -fastaout $filtered 
+        --fastqout $filtered 
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

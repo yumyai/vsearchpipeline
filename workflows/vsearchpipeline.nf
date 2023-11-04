@@ -143,20 +143,19 @@ workflow VSEARCHPIPELINE {
     //
     VSEARCH_DEREPFULLLENGTH (
         VSEARCH_FASTQFILTER.out.reads,
-        params.derep_strand,
-        params.derep_fastawidth
+        params.derep_strand
     )
     //
     // Combine all reads
     //
-    fasta_files = VSEARCH_DEREPFULLLENGTH.out.reads
+    fastq_files = VSEARCH_DEREPFULLLENGTH.out.reads
         .collect { it[1] }
 
     // 
     // MODULE: VSEARCH dereplicate for all reads
     //
     VSEARCH_DEREPFULLLENGTHALL (
-        fasta_files,
+        fastq_files,
         params.derep_all_strand,
         params.derep_all_fastawidth,
         params.derep_all_minunique

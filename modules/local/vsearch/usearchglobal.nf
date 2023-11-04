@@ -8,6 +8,7 @@ process VSEARCH_USEARCHGLOBAL {
     val id
     
     output:
+    path "all.concat.fasta"         , emit: concatfasta
     path "count_table.txt"          , emit: counts
     path "versions.yml"             , emit: versions
 
@@ -19,7 +20,12 @@ process VSEARCH_USEARCHGLOBAL {
 
     """
     vsearch \\
-        --usearch_global $allreads \\
+        --fastq_filter $allreads \\
+        --fasta_width 0 \\
+        --fastaout all.concat.fasta
+    
+    vsearch \\
+        --usearch_global all.concat.fasta \\
         --db $asvs \\
         --id $id \\
         --threads $task.cpus \\

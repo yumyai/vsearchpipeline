@@ -9,6 +9,7 @@ process PHYLOSEQ_RAREFACTION {
     output:
     path "phyloseq_rarefied.RDS"    , emit: phyloseq
     path "rarehist.pdf"             , emit: rarecurve
+    path "rarehist_log.pdf"         , emit: rarecurvelog
 
     when:
     task.ext.when == null || task.ext.when
@@ -31,7 +32,7 @@ process PHYLOSEQ_RAREFACTION {
     pdf('rarehist.pdf')
         hist(rowSums(phylo@otu_table), breaks = 50)
     dev.off()
-    pdf('rarehist.pdf')
+    pdf('rarehist_log.pdf')
         hist(log10(rowSums(phylo@otu_table)), breaks = 50)
     dev.off()
    print(paste0('Max counts: ', max(rowSums(phylo@otu_table))))

@@ -18,14 +18,9 @@ process VSEARCH_USEARCHGLOBAL {
     script:
     def args = task.ext.args ?: ''
 
-    """
+    """  
     vsearch \\
-        --fastq_filter $allreads \\
-        --fasta_width 0 \\
-        --fastaout all.concat.fasta
-    
-    vsearch \\
-        --usearch_global all.concat.fasta \\
+        --usearch_global $allreads \\
         --db $asvs \\
         --id $id \\
         --threads $task.cpus \\

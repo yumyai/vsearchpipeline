@@ -9,7 +9,7 @@ process VSEARCH_DEREPFULLLENGTH {
     val strand
 
     output:
-    tuple val(meta), path("*.derep.fastq")     , emit: reads
+    tuple val(meta), path("*.derep.fasta")     , emit: reads
 
     when:
     task.ext.when == null || task.ext.when
@@ -17,11 +17,11 @@ process VSEARCH_DEREPFULLLENGTH {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def uniq = "${prefix}.derep.fastq"
+    def uniq = "${prefix}.derep.fasta"
     """
     vsearch \\
         --fastx_uniques $reads \\
-        --fastqout $uniq \\
+        --fastaout $uniq \\
         --strand $strand \\
         --sizeout \\
         --relabel $prefix.

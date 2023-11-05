@@ -53,8 +53,8 @@ process PHYLOSEQ_FIXTAXONOMY {
     df2 <- data.frame(
         level = c("Species", "Genus", "Family", "Phylum"),
         ntax = rep(nrow(tax300), 4),
-        number_known = c(sum(!is.na(tax\$Species)), sum(!is.na(tax\$Genus)),
-                        sum(!is.na(tax\$Family)), sum(!is.na(tax\$Phylum))),
+        number_known = c(sum(!is.na(tax300\$Species)), sum(!is.na(tax300\$Genus)),
+                        sum(!is.na(tax300\$Family)), sum(!is.na(tax300\$Phylum))),
         perc_known = c(splevel, genlevel, famlevel, phylevel)
     )
     write.csv2(df2, 'phylogen_levels_top300.csv')

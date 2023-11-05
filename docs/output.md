@@ -72,13 +72,12 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - `vsearch/`
   - `*.merged.fastq.gz`: merged fastq.gz per sample
   - `*.filtered.fastq`: filtered fastq per sample
-  - `*.derep.fastq`: dereplicated fastq per sample
-  - `all.concat.fastq`: all reads concatenated in one fastq file
+  - `*.derep.fasta`: dereplicated fastq per sample
+  - `all.concat.fasta`: all reads concatenated in one fastq file
   - `all.derep.fasta`: fasta file with unique sequences resulting from `fastq_uniques` for all concatenated reads
   - `asvs.clustered.fasta`: ASV fasta resulting from clustering
   - `asvs_nonchimeras.fasta`: fasta with ASVs that are left after `uchime3_denovo` chimera detection
   - `chimeras.fasta`: chimeras that were filtered out by `uchime3_denovo`
-  - `all.concat.fasta`: the `all_concat.fastq` file converted to fasta with `fastqfilter` for `usearch_global`
   - `count_table.txt`: count table resulting from `usearch_global`
 
 </details>
@@ -87,9 +86,9 @@ In a series of seven [VSEARCH](https://github.com/torognes/vsearch/wiki/VSEARCH-
 
 First, the reads are merged using `fastq_merge` (default maxdiffs 30, no minlen or maxlen setting), so that there is one fasta file per sample left. Next, `fastq_filter` is used to filter the reads (default maxee = 1 and maxns = 1, no minlen or maxlen filter), resulting in a filtered fasta file per sample. 
 
-Samples are then dereplicated per sample using `fastq_uniques`, resulting in a dereplicated fasta per sample. All dereplicated reads are then combined in one channel (`all.concat.fastq`) to be dereplicated again (default minunique=2), resulting in `all.derep.fasta`. This dereplicating process is performed twice since the dereplication is more efficient if first performed at sample-level - in other words, the first round per sample is mostly for compression purposes.
+Samples are then dereplicated per sample using `fastq_uniques`, resulting in a dereplicated fasta per sample. All dereplicated reads are then combined in one channel (`all.concat.fasta`) to be dereplicated again (default minunique=2), resulting in `all.derep.fasta`. This dereplicating process is performed twice since the dereplication is more efficient if first performed at sample-level - in other words, the first round per sample is mostly for compression purposes.
 
-The `cluster_unoise` function is used to denoise fasta sequences with the defaults for minsize (8) and alpha (2) as defined by VSEARCH itself, resulting in `asvs.clustered.fasta`. Chimeras are removed using the `uchime3_denovo` method that uses the UNOISE version 3 algorithm by Robert Edgar. Both chimeras that are filtered out (`chimeras.fasta`) and ASVs without chimeras (`asvs_nonchimeras.fasta`), labelled with `ASV_` followed by a number, are saved. Using global pairwise alignment with `usearch_global`, target sequences `all.concat.fasta` (resulting from conversion of `all.concat.fastq` to fasta format) are compared to `asv_nonchimeras.fasta`.
+The `cluster_unoise` function is used to denoise fasta sequences with the defaults for minsize (8) and alpha (2) as defined by VSEARCH itself, resulting in `asvs.clustered.fasta`. Chimeras are removed using the `uchime3_denovo` method that uses the UNOISE version 3 algorithm by Robert Edgar. Both chimeras that are filtered out (`chimeras.fasta`) and ASVs without chimeras (`asvs_nonchimeras.fasta`), labelled with `ASV_` followed by a number, are saved. Using global pairwise alignment with `usearch_global`, target sequences `all.concat.fasta` are compared to `asv_nonchimeras.fasta`.
 
 ### MAFFT
 

@@ -27,9 +27,11 @@ process PHYLOSEQ_METRICS {
     #!/usr/bin/env Rscript
     ## Libraries
     library(phyloseq)
-    library(tidyverse)
-    library(ggpubr)
+    library(dplyr)
+    library(ggplot2)
+    library(tidyr)
     library(vegan)
+    library(forcats)
 
     ## Functions
     cols <- c("darkgreen", 'firebrick', "navy", "dodgerblue",  "goldenrod2", "chartreuse4", "darkorange2", "rosybrown1", "darkred", "lightskyblue",
@@ -102,13 +104,14 @@ process PHYLOSEQ_METRICS {
     tab <- as(phy@otu_table, 'matrix')
     counts <- sample_sums(phy@otu_table)
     tab <- as.data.frame(t(tab/sample_sums(phy))*100)
+    tab_comp <- tab
+    tab_comp\$Sample <- rownames(tab_comp)
     rowSums(tab) # samples should all sum up to 100%
 
     #### Species-level ####
     N <- 20
     # convert to long format
-    d <- tab %>% 
-        rownames_to_column(var = 'Sample') %>% 
+    d <- tab_comp %>% 
         pivot_longer(-Sample, names_to = 'ASV', values_to = 'Abundance') %>% 
         mutate(sampleID = Sample)
     d\$Tax <- tax\$Tax[match(d\$ASV, tax\$ASV)]
@@ -155,12 +158,11 @@ process PHYLOSEQ_METRICS {
         labs(y="Composition (%)", x = "", title = "Species", fill = "") +
         scale_y_continuous(expand = c(0, 0)) +
         theme_composition()
-    ggsave(comp_species, "composition_species_${postfix}.pdf")
+    ggsave(plot = comp_species, "composition_species_${postfix}.pdf")
 
     #### Genus-level ####
     N <- 20
-    d <- tab %>% 
-        rownames_to_column(var = 'Sample') %>% 
+    d <- tab_comp %>% 
         pivot_longer(-Sample, names_to = 'ASV', values_to = 'Abundance') %>% 
         mutate(sampleID = Sample)
     d\$Genus <- tax\$Genus[match(d\$ASV, tax\$ASV)]
@@ -205,13 +207,12 @@ process PHYLOSEQ_METRICS {
         labs(y="Composition (%)", x = "", title = "Genus") +
         scale_y_continuous(expand = c(0, 0)) +
         theme_composition()
-    ggsave(comp_genus, "composition_genus_${postfix}.pdf")
+    ggsave(plot = comp_genus, "composition_genus_${postfix}.pdf")
 
     #### Family level ####
     N <- 20
     # convert to long format
-    d <- tab %>% 
-        rownames_to_column(var = 'Sample') %>% 
+    d <- tab_comp %>% 
         pivot_longer(-Sample, names_to = 'ASV', values_to = 'Abundance') %>% 
         mutate(sampleID = Sample)
     # add species taxonomy (including ambiguous)
@@ -256,14 +257,13 @@ process PHYLOSEQ_METRICS {
         labs(y="Composition (%)", x = "", title = "Family") +
         scale_y_continuous(expand = c(0, 0)) +
         theme_composition()
-    ggsave(comp_family, "composition_family_${postfix}.pdf")
+    ggsave(plot = comp_family, "composition_family_${postfix}.pdf")
 
 
     #### Phylum level ####
     N <- 6
     # convert to long format
-    d <- tab %>% 
-        rownames_to_column(var = 'Sample') %>% 
+    d <- tab_comp %>% 
         pivot_longer(-Sample, names_to = 'ASV', values_to = 'Abundance') %>% 
         mutate(sampleID = Sample)
     d\$Phylum <- tax\$Phylum[match(d\$ASV, tax\$ASV)]
@@ -309,7 +309,7 @@ process PHYLOSEQ_METRICS {
         labs(y="Composition (%)", x = "", title = "Phylum") +
         scale_y_continuous(expand = c(0, 0)) +
         theme_composition()
-    ggsave(comp_phylum, "composition_phylum_${postfix}.pdf")
+    ggsave(plot = comp_phylum, "composition_phylum_${postfix}.pdf")
 
 
     ## Diversity metrics
@@ -321,7 +321,7 @@ process PHYLOSEQ_METRICS {
         theme_Publication() +
         xlab("Shannon index") +
         ggtitle("Shannon index")
-    ggsave("shannon_index_${postfix}.pdf")
+    ggsave(plot = shanpl, "shannon_index_${postfix}.pdf")
 
     specrich <- specnumber(tab)
     dfspec <- as.data.frame(specrich)
@@ -331,14 +331,14 @@ process PHYLOSEQ_METRICS {
         theme_Publication() +
         xlab("Number of species") +
         ggtitle("Species richness")
-    ggsave("species_richness_${postfix}.pdf")
+    ggsave(plot = specpl, "species_richness_${postfix}.pdf")
 
     report <- paste0(
         "This dataset has ", nsamples(phy), " samples and ", ntaxa(phy), " taxa.\n",
         "Species richness: mean ", mean(specrich), ", sd ", sd(specrich), ", min ", min(specrich), ", max ", max(specrich), "\n",
         "Shannon index: mean ", mean(shannon), " sd ", sd(shannon), "."
         )
-    write.txt(report, "metrics_overview_${postfix}.txt")
+    writeLines(report, "metrics_overview_${postfix}.txt")
     """
     
     stub:

@@ -8,7 +8,7 @@ process PHYLOSEQ_RAREFACTION {
 
     output:
     path "phyloseq_rarefied.RDS"    , emit: phyloseq
-    path "rarehist.pdf"             , emit: rarecurve
+    path "rarefaction_plot.pdf"     , emit: rarecurve
     path "rarefaction_report.txt"   , emit: rarereport
 
     when:
@@ -22,6 +22,7 @@ process PHYLOSEQ_RAREFACTION {
     """
     #!/usr/bin/env Rscript
     library(phyloseq)
+    library(ggplot2)
 
     ## Open data
     phylo <- readRDS('$phyloseq')
@@ -72,12 +73,17 @@ process PHYLOSEQ_RAREFACTION {
     }
 
     ## Plot histogram
-    pdf('rarehist.pdf')
-        hist(colSums(phylo@otu_table), breaks = nsamples(phylo)/10)
-        abline(v=rarelevel, col='red', lwd=3, lty='dashed')
-    dev.off()
+    raredf <- data.frame(rarefaction = colSums(phylo@otu_table))
+    rarepl <- ggplot(raredf, aes(x = rarefaction)) +
+                geom_histogram(color = "black", 
+                            fill = "royalblue", alpha = 0.8) +
+                geom_vline(aes(xintercept = 15000), color = "firebrick") + 
+                theme_minimal() +
+                xlab("Number of counts") +
+                ggtitle("Total counts distribution")
+    ggsave(plot = rarepl, 'rarefaction_plot.pdf')
     
-    write.txt(report, 'rarefaction_report.txt')
+    writeLines(report, 'rarefaction_report.txt')
     saveRDS(phylo_rare, 'phyloseq_rarefied.RDS')
     """
 

@@ -424,6 +424,12 @@
                     "type": "boolean",
                     "description": "Skip process to make a table with composite taxonomy names",
                     "fa_icon": "fas fa-forward"
+                },
+                "skip_metrics": {
+                    "type": "boolean",
+                    "description": "Skip process to provide some general metrics of the phyloseq object (composition, diversity)",
+                    "default": false,
+                    "fa_icon": "fas fa-forward"
                 }
             },
             "fa_icon": "fas fa-forward"

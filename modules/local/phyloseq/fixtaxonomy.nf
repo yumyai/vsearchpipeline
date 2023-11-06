@@ -4,18 +4,19 @@ process PHYLOSEQ_FIXTAXONOMY {
 
     input:
     path    phyloseq
-
+    val     complete
+    
     output:
-    path "taxtable.RDS"                 , emit: taxonomy
-    path "phylogen_levels.csv"          , emit: phylevels
-    path "phylogen_levels_top300.csv"   , emit: phylevelstop
+    path "taxtable_*.RDS"                 , emit: taxonomy
+    path "phylogen_levels_*.csv"          , emit: phylevels
+    path "phylogen_levels_top300_*.csv"   , emit: phylevelstop
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
     def args = task.ext.args ?: ''
-    def seed = task.ext.seed ?: '1234'
+    def postfix = complete ? "complete" : "rarefied"
     """
     #!/usr/bin/env Rscript
     library(phyloseq)
@@ -39,7 +40,7 @@ process PHYLOSEQ_FIXTAXONOMY {
                         sum(!is.na(tax\$Family)), sum(!is.na(tax\$Phylum))),
         perc_known = c(splevel, genlevel, famlevel, phylevel)
     )
-    write.csv2(df, 'phylogen_levels.csv')
+    write.csv2(df, 'phylogen_levels_${postfix}.csv')
 
     ### Check levels top 300
     taxasums <- taxa_sums(phylo)
@@ -57,7 +58,7 @@ process PHYLOSEQ_FIXTAXONOMY {
                         sum(!is.na(tax300\$Family)), sum(!is.na(tax300\$Phylum))),
         perc_known = c(splevel, genlevel, famlevel, phylevel)
     )
-    write.csv2(df2, 'phylogen_levels_top300.csv')
+    write.csv2(df2, 'phylogen_levels_top300_${postfix}.csv')
 
     # get 'nice' taxonomy for ASVs (unfortunately in base R)
     tax\$Tax <- ifelse(!is.na(tax\$Genus) & !is.na(tax\$Species), paste(tax\$Genus, tax\$Species),
@@ -70,14 +71,15 @@ process PHYLOSEQ_FIXTAXONOMY {
                     ifelse(is.na(tax\$Kingdom), 'unclassified', NA))))))))
     tax\$ASV <- rownames(tax)
 
-    saveRDS(tax, file = "taxtable.RDS")
+    saveRDS(tax, file = "taxtable_${postfix}.RDS")
     """
-     
+    
     stub:
     def args = task.ext.args ?: ''
 
     """
-    touch taxtable.RDS
-    touch phylogen_levels.csv
+    touch taxtable_${postfix}.RDS
+    touch phylogen_levels_${postfix}.csv
+    touch phylogen_levels_top300_${postfix}.csv
     """
 }

@@ -9,8 +9,9 @@ process PHYLOSEQ_MAKEOBJECT {
     path taxtable
 
     output:
-    path "phyloseq.RDS"      , emit: phyloseq
-    path "versions.yml"      , emit: versions
+    path "phyloseq.RDS"             , emit: phyloseq
+    path "phylo_raw_taxtable.csv"   , emit: taxtable
+    path "versions.yml"             , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -49,6 +50,7 @@ process PHYLOSEQ_MAKEOBJECT {
     sample_names(ps)
 
     saveRDS(ps, "phyloseq.RDS")
+    write.csv(ps@tax_table, "phylo_raw_taxtable.csv")
 
     writeLines(paste0("\\"${task.process}\\":\n", 
             paste0("    R: ", paste0(R.Version()[c("major","minor")], collapse = "."), "\n"),

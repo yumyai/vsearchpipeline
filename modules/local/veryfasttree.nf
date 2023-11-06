@@ -24,10 +24,10 @@ process VERYFASTTREE {
     """
     VeryFastTree \\
         -nt \\
-        $dp \\
         -gtr \\
         -gamma $msa \\
         -threads $task.cpus \\
+        $dp \\
         > asvs.msa.tree
 
     cat <<-END_VERSIONS > versions.yml

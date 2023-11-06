@@ -35,21 +35,25 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 // MODULE: Local modules
 //
-include { SEQTK_TRIMFQ }                from '../modules/local/seqtk/trimfq'
-include { VSEARCH_FASTQMERGEPAIRS }     from '../modules/local/vsearch/fastqmergepairs'
-include { VSEARCH_FASTQFILTER }         from '../modules/local/vsearch/fastqfilter'
-include { VSEARCH_DEREPFULLLENGTH }     from '../modules/local/vsearch/derepfulllength'
-include { VSEARCH_DEREPFULLLENGTHALL }  from '../modules/local/vsearch/derepfulllengthall'
-include { VSEARCH_CLUSTERUNOISE }       from '../modules/local/vsearch/clusterunoise'
-include { VSEARCH_UCHIMEDENOVO }        from '../modules/local/vsearch/uchimedenovo'
-include { VSEARCH_USEARCHGLOBAL }       from '../modules/local/vsearch/usearchglobal'
-include { MAFFT }                       from '../modules/local/mafft'
-include { VERYFASTTREE }                from '../modules/local/veryfasttree'
-include { SILVADATABASES }              from '../modules/local/silvadatabases'
-include { DADA2_ASSIGNTAXONOMY }        from '../modules/local/dada2/assigntaxonomy'
-include { PHYLOSEQ_MAKEOBJECT }         from '../modules/local/phyloseq/makeobject'
-include { PHYLOSEQ_RAREFACTION }        from '../modules/local/phyloseq/rarefaction'
-include { PHYLOSEQ_FIXTAXONOMY }        from '../modules/local/phyloseq/fixtaxonomy'
+include { SEQTK_TRIMFQ }                                    from '../modules/local/seqtk/trimfq'
+include { VSEARCH_FASTQMERGEPAIRS }                         from '../modules/local/vsearch/fastqmergepairs'
+include { VSEARCH_FASTQFILTER }                             from '../modules/local/vsearch/fastqfilter'
+include { VSEARCH_DEREPFULLLENGTH }                         from '../modules/local/vsearch/derepfulllength'
+include { VSEARCH_DEREPFULLLENGTHALL }                      from '../modules/local/vsearch/derepfulllengthall'
+include { VSEARCH_CLUSTERUNOISE }                           from '../modules/local/vsearch/clusterunoise'
+include { VSEARCH_UCHIMEDENOVO }                            from '../modules/local/vsearch/uchimedenovo'
+include { VSEARCH_USEARCHGLOBAL }                           from '../modules/local/vsearch/usearchglobal'
+include { MAFFT }                                           from '../modules/local/mafft'
+include { VERYFASTTREE }                                    from '../modules/local/veryfasttree'
+include { SILVADATABASES }                                  from '../modules/local/silvadatabases'
+include { DADA2_ASSIGNTAXONOMY }                            from '../modules/local/dada2/assigntaxonomy'
+include { PHYLOSEQ_MAKEOBJECT }                             from '../modules/local/phyloseq/makeobject'
+include { PHYLOSEQ_FIXTAXONOMY as FIXTAX_COMPLETE }         from '../modules/local/phyloseq/fixtaxonomy'
+include { PHYLOSEQ_METRICS as METRICS_COMPLETE }            from '../modules/local/phyloseq/metrics'
+include { PHYLOSEQ_RAREFACTION }                            from '../modules/local/phyloseq/rarefaction'
+include { PHYLOSEQ_METRICS as METRICS_RAREFIED }            from '../modules/local/phyloseq/metrics'
+include { PHYLOSEQ_FIXTAXONOMY as FIXTAX_RAREFIED }         from '../modules/local/phyloseq/fixtaxonomy'
+
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -226,25 +230,63 @@ workflow VSEARCHPIPELINE {
         VERYFASTTREE.out.tree,
         DADA2_ASSIGNTAXONOMY.out.taxtable
     )
+    ch_phyloseq = PHYLOSEQ_MAKEOBJECT.out.phyloseq
+
     ch_versions = ch_versions.mix(PHYLOSEQ_MAKEOBJECT.out.versions)
 
-    //
-    // MODULE: Rarefaction
-    //
-    if (!params.skip_rarefaction) {
-        PHYLOSEQ_RAREFACTION (
-            PHYLOSEQ_MAKEOBJECT.out.phyloseq,
-            params.rarelevel,
-        ).phyloseq.set{ ch_rarefied_phyloseq }
-    } else {
-        ch_rarefied_phyloseq = PHYLOSEQ_MAKEOBJECT.out.phyloseq
-    }
+    ch_taxtable = PHYLOSEQ_MAKEOBJECT.out.taxtable
 
+    ch_complete = true
+    //
+    // MODULE: Fix taxonomy
+    //
     if (!params.skip_fixtaxonomy) {
-        PHYLOSEQ_FIXTAXONOMY (
-            ch_rarefied_phyloseq
+        FIXTAX_COMPLETE (
+            ch_phyloseq,
+            ch_complete
         )
     }
+    ch_taxtable = FIXTAX_COMPLETE.out.taxonomy
+    // //
+    // // MODULE: Overview metrics
+    // //
+    if (!params.skip_metrics) {
+        METRICS_COMPLETE (
+            ch_phyloseq,
+            ch_taxtable,
+            ch_complete
+        )
+    }
+
+    if (!params.skip_rarefaction) {
+        ch_complete = false
+        //
+        // MODULE: Rarefaction
+        //
+        PHYLOSEQ_RAREFACTION (
+            ch_phyloseq,
+            params.rarelevel,
+        )
+        
+        ch_rarefied_phyloseq = PHYLOSEQ_RAREFACTION.out.phyloseq
+
+        if (!params.skip_fixtaxonomy) {
+            FIXTAX_RAREFIED (
+                ch_rarefied_phyloseq,
+                ch_complete
+            )
+        }
+        ch_rarefied_taxtable = FIXTAX_RAREFIED.out.taxonomy
+
+        if (!params.skip_metrics) {
+            METRICS_RAREFIED (
+                ch_rarefied_phyloseq,
+                ch_rarefied_taxtable,
+                ch_complete
+            )
+        }
+    }
+    
     //
     // MODULE: Collect software versions
     //

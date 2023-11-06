@@ -25,7 +25,7 @@ process PHYLOSEQ_RAREFACTION {
 
     ## Open data
     phylo <- readRDS('$phyloseq')
-    numbers_before_rarefaction <- paste0('The phyloseq object has ', nsamples(phylo), ' samples and',
+    numbers_before_rarefaction <- paste0('The phyloseq object has ', nsamples(phylo), ' samples and ',
                  ntaxa(phylo), ' taxa. \n')
     print(numbers_before_rarefaction)
     
@@ -33,6 +33,7 @@ process PHYLOSEQ_RAREFACTION {
     rarelevel <- mean(colSums(phylo@otu_table)) - 2*sd(rowSums(phylo@otu_table))
     if(rarelevel <= 15000){ rarelevel <- median(colSums(phylo@otu_table)) - IQR(colSums(phylo@otu_table)) }
     if(rarelevel <= 15000){ rarelevel <- 15000}
+    if(all(colSums(phylo@otu_table) < 15000)){ rarelevel <- min(colSums(phylo@otu_table))}
 
     print(paste0('Max counts: ', max(colSums(phylo@otu_table))))
     print(paste0('Min counts: ', min(colSums(phylo@otu_table))))

@@ -12,8 +12,8 @@ process SEQTK_TRIMFQ {
     val primers
 
     output:
-    tuple val(meta), path("*.trim.fastq.gz") , emit: reads
-    path "versions.yml"                     , emit: versions
+    tuple val(meta), path("*.trim.fastq.gz")    , emit: reads
+    path "versions.yml"                         , emit: versions
 
     script:
     def args = task.ext.args ?: ''
@@ -28,27 +28,17 @@ process SEQTK_TRIMFQ {
     """
     primer_fwd_rep=\$(echo "${primers.forward}" | sed 's/[^ACGT]/./g')
     primer_rev_rep=\$(echo "${primers.reverse}" | sed 's/[^ACGT]/./g')
-    fwd_match_count=\$(zcat $fwd_reads | grep -c \$primer_fwd_rep)
-    rev_match_count=\$(zcat $rev_reads | grep -c \$primer_rev_rep)
 
-    if [ \$fwd_match_count -ge 10 ] && [ \$rev_match_count -ge 10 ]; then
-        seqtk \\
-            trimfq \\
-            -b $fwd_chars \\
-            $fwd_reads \\
-            | gzip > $fwd_trimmed
-
-        seqtk \\
-            trimfq \\
-            -b $rev_chars \\
-            $rev_reads \\
-            | gzip > $rev_trimmed
+    if [ "\$(zcat "$fwd_reads" | grep -c "\$primer_fwd_rep")" -ge 10 ] && [ "\$(zcat "$rev_reads" | grep -c "\$primer_rev_rep")" -ge 10 ] 
+    then
+        seqtk trimfq -b $fwd_chars "$fwd_reads" | gzip > $fwd_trimmed
+        seqtk trimfq -b $rev_chars "$rev_reads" | gzip > $rev_trimmed
     else
-      echo "Warning: Few primer matches found, no trimming performed" >&2
-      cp S2_R1.fastq.gz sampleID_2_T1_1.trim.fastq.gz
-      cp S2_R2.fastq.gz sampleID_2_T1_2.trim.fastq.gz
-    fi    
-    
+        echo 'Warning: Few primer matches found, no trimming performed' >&2
+        cp "$fwd_reads" "$fwd_trimmed"
+        cp "$rev_reads" "$rev_trimmed"
+    fi
+        
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         : \$(echo \$(seqtk --version 2>&1) | sed 's/^.*seqtk //; s/Using.*\$//' ))

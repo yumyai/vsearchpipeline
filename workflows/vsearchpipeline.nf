@@ -47,12 +47,12 @@ include { MAFFT }                                                   from '../mod
 include { VERYFASTTREE }                                            from '../modules/local/veryfasttree'
 include { SILVADATABASES }                                          from '../modules/local/silvadatabases'
 include { DADA2_ASSIGNTAXONOMY }                                    from '../modules/local/dada2/assigntaxonomy'
-include { PHYLOSEQ_MAKEOBJECT }                                     from '../modules/local/phyloseq/makeobject'
-include { PHYLOSEQ_FIXTAXONOMY as PHYLOSEQ_FIXTAX_COMPLETE }        from '../modules/local/phyloseq/fixtaxonomy'
-include { PHYLOSEQ_METRICS as PHYLOSEQ_METRICS_COMPLETE }           from '../modules/local/phyloseq/metrics'
-include { PHYLOSEQ_RAREFACTION }                                    from '../modules/local/phyloseq/rarefaction'
-include { PHYLOSEQ_METRICS as PHYLOSEQ_METRICS_RAREFIED }           from '../modules/local/phyloseq/metrics'
-include { PHYLOSEQ_FIXTAXONOMY as PHYLOSEQ_FIXTAX_RAREFIED }        from '../modules/local/phyloseq/fixtaxonomy'
+include { PHYLOSEQ_MAKEOBJECT as PHYLOSEQ_COMPLETE_MAKEOBJECT }     from '../modules/local/phyloseq/makeobject'
+include { PHYLOSEQ_FIXTAXONOMY as PHYLOSEQ_COMPLETE_FIXTAX }        from '../modules/local/phyloseq/fixtaxonomy'
+include { PHYLOSEQ_METRICS as PHYLOSEQ_COMPLETE_METRICS }           from '../modules/local/phyloseq/metrics'
+include { PHYLOSEQ_RAREFACTION as PHYLOSEQ_RAREFIED }               from '../modules/local/phyloseq/rarefaction'
+include { PHYLOSEQ_METRICS as PHYLOSEQ_RAREFIED_METRICS }           from '../modules/local/phyloseq/metrics'
+include { PHYLOSEQ_FIXTAXONOMY as PHYLOSEQ_RAREFIED_FIXTAX }        from '../modules/local/phyloseq/fixtaxonomy'
 
 
 //
@@ -224,38 +224,37 @@ workflow VSEARCHPIPELINE {
     //
     // MODULE: Make phyloseq object
     //
-    PHYLOSEQ_MAKEOBJECT (
+    PHYLOSEQ_COMPLETE_MAKEOBJECT (
         VSEARCH_UCHIMEDENOVO.out.asvs,
         VSEARCH_USEARCHGLOBAL.out.counts,
         VERYFASTTREE.out.tree,
         DADA2_ASSIGNTAXONOMY.out.taxtable
     )
-    ch_phyloseq = PHYLOSEQ_MAKEOBJECT.out.phyloseq
 
-    ch_versions = ch_versions.mix(PHYLOSEQ_MAKEOBJECT.out.versions)
-
-    ch_taxtable = PHYLOSEQ_MAKEOBJECT.out.taxtable
-
+    ch_phyloseq = PHYLOSEQ_COMPLETE_MAKEOBJECT.out.phyloseq
+    ch_versions = ch_versions.mix(PHYLOSEQ_COMPLETE_MAKEOBJECT.out.versions)
+    ch_taxtable = PHYLOSEQ_COMPLETE_MAKEOBJECT.out.taxtable
     ch_complete = true
+
     //
     // MODULE: Fix taxonomy
     //
     if (!params.skip_fixtaxonomy) {
-        PHYLOSEQ_FIXTAX_COMPLETE (
+        PHYLOSEQ_COMPLETE_FIXTAX (
             ch_phyloseq,
             ch_complete
         )
-    }
-    ch_taxtable = PHYLOSEQ_FIXTAX_COMPLETE.out.taxonomy
-    // //
-    // // MODULE: Overview metrics
-    // //
-    if (!params.skip_metrics) {
-        PHYLOSEQ_METRICS_COMPLETE (
-            ch_phyloseq,
-            ch_taxtable,
-            ch_complete
-        )
+        ch_taxtable = PHYLOSEQ_COMPLETE_FIXTAX.out.taxonomy
+        // //
+        // // MODULE: Overview metrics
+        // //
+        if (!params.skip_metrics) {
+            PHYLOSEQ_COMPLETE_METRICS (
+                ch_phyloseq,
+                ch_taxtable,
+                ch_complete
+            )
+        }
     }
 
     if (!params.skip_rarefaction) {
@@ -263,27 +262,27 @@ workflow VSEARCHPIPELINE {
         //
         // MODULE: Rarefaction
         //
-        PHYLOSEQ_RAREFACTION (
+        PHYLOSEQ_RAREFIED (
             ch_phyloseq,
             params.rarelevel,
         )
         
-        ch_rarefied_phyloseq = PHYLOSEQ_RAREFACTION.out.phyloseq
+        ch_rarefied_phyloseq = PHYLOSEQ_RAREFIED.out.phyloseq
 
         if (!params.skip_fixtaxonomy) {
-            PHYLOSEQ_FIXTAX_RAREFIED (
+            PHYLOSEQ_RAREFIED_FIXTAX (
                 ch_rarefied_phyloseq,
                 ch_complete_new
             )
-        }
-        ch_rarefied_taxtable = PHYLOSEQ_FIXTAX_RAREFIED.out.taxonomy
-
-        if (!params.skip_metrics) {
-            PHYLOSEQ_METRICS_RAREFIED (
-                ch_rarefied_phyloseq,
-                ch_rarefied_taxtable,
-                ch_complete_new
-            )
+    
+        ch_rarefied_taxtable = PHYLOSEQ_RAREFIED_FIXTAX.out.taxonomy
+            if (!params.skip_metrics) {
+                PHYLOSEQ_RAREFIED_METRICS (
+                    ch_rarefied_phyloseq,
+                    ch_rarefied_taxtable,
+                    ch_complete_new
+                )
+            }
         }
     }
     

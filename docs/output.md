@@ -132,14 +132,33 @@ The `cluster_unoise` function is used to denoise fasta sequences with the defaul
 <summary>Output files</summary>
 
 - `phyloseq/`
-  - `phyloseq.RDS`: phyloseq object of count table, tax table and tree
-  - `phyloseq_rarefied.RDS`: this is a rarefied phyloseq object
-  - `rarehist.pdf`: histogram of of counts per sample
-  - `rarahist_log.pdf`: histogram of counts per sample, log10-transformed
-  - `discarded_samples.csv`: samples that were discarded during rarefaction and their counts
-  - `taxtable.RDS`: taxtable with assembled taxonomy in the last column in RDS format
-  - `phylogen_levels.csv`: this table shows the phylogenetic levels known as a percentage of all ASVs
-  - `phylogen_levels_top300.csv`: this table shows the phylogenetic levels known as a percentage of the top 300 most abundant ASVs
+  - `complete/`
+    - `phyloseq.RDS`: phyloseq object of count table, tax table and tree
+    - `phylo_raw_taxtable.csv`: taxtable with columns for taxonomic levels
+    - `taxtable_complete.RDS`: taxtable with assembled taxonomy in last column
+    - `phylogen_levels.csv`: this table shows the phylogenetic levels known as a percentage of all ASVs
+    - `phylogen_levels_top300.csv`: this table shows the phylogenetic levels known as a percentage of the top 300 most abundant ASVs
+    - `composition_species_complete.pdf`: composition plot at species level
+    - `composition_genus_complete.pdf`: composition plot at species level
+    - `composition_family_complete.pdf`: composition plot at species level
+    - `composition_phylum_complete.pdf`: composition plot at species level
+    - `shannon_index_complete.pdf`: shannon diversity histogram
+    - `species_richness_complete.pdf`: species richness histogram
+    - `metrics_overview_complete`: some metrics on composition and diversity
+  - `rarefied/`
+    - `phyloseq_rarefied.RDS`: this is the rarefied phyloseq object
+    - `rarefaction_plot.pdf`: histogram of total counts per sample with red line for defined rarefaction level
+    - `rarefaction_report.txt`: report of rarefaction process
+    - `taxtable_rarefied.RDS`: taxtable with assembled taxonomy in last column
+    - `phylogen_levels.csv`: this table shows the phylogenetic levels known as a percentage of all ASVs
+    - `phylogen_levels_top300.csv`: this table shows the phylogenetic levels known as a percentage of the top 300 most abundant ASVs
+    - `composition_species_rarefied.pdf`: composition plot at species level
+    - `composition_genus_rarefied.pdf`: composition plot at species level
+    - `composition_family_rarefied.pdf`: composition plot at species level
+    - `composition_phylum_rarefied.pdf`: composition plot at species level
+    - `shannon_index_rarefied.pdf`: shannon diversity histogram
+    - `species_richness_rarefied.pdf`: species richness histogram
+    - `metrics_overview_rarefied`: some metrics on composition and diversity
 
 </details>
 
@@ -151,11 +170,17 @@ As an optional feature, this pipeline also has a process to rarefy data. It's ho
 - Rarefaction level as defined by `rarelevel` parameter, if set; otherwise,
 - Mean - 2SDs: if that is >15000; 
 - Median - IQR: if that is >15000; 
-- 15000.
-Empty ASVs are trimmed from the dataset after this procedure. The rarefied phyloseq is saved as `phyloseq_rarefied.RDS`. The plots with the distribution of sample counts are saved as `rarehist.pdf` and `rarehist_log.pdf`. The samples that were discarded because of the rarefaction and their counts are saved in `discarded_samples.csv`.
+- 15000;
+- If there's no samples left above >15000; minimum total counts of the samples.
+Empty ASVs are trimmed from the dataset after this procedure. The rarefied phyloseq is saved as `phyloseq_rarefied.RDS`. The plots with the distribution of sample counts are saved as `rarefaction_plot.pdf`.
+
+The processes for nicer taxonomy and metrics are both executed on the complete phyloseq object and the rarefied phyloseq object. If `skip_taxonomy` is set to true, the metrics won't be generated either because this process depends on the assembled taxonomy resulting from the taxonomy process.
 
 #### Nicer taxonomy
 The process in which the taxonomy levels are made into one taxonomy name for publication (e.g. 'Roseburia hominis' or 'Roseburia spp.') are saved in `taxtable.RDS`. The known phylogenetic levels for all ASVs and the top 300 most abundant ASVs are saved in `phylogen_levels.csv` and `phylogen_levels_top300.csv`, respectively.
+
+#### Metrics
+In this process, compositional plots and diversity (Shannon, richness) histograms are made to give some overview of the output data. 
 
 
 ### MultiQC

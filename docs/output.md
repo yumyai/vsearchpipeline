@@ -20,7 +20,8 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
   - [uchime_denovo](#vsearch) - Remove chimeras with uchime_denovo method
   - [usearch_global](#vsearch) - Make count table from ASVs and dereplicated reads
 - [MAFFT](#mafft) - Multiple sequence alignment of ASVs
-- [VeryFastTree](#veryfasttree) - Make phylogenetic tree of multiple sequence alignment
+- [FastTree](#fasttree) - Make phylogenetic tree of multiple sequence alignment
+- [IQTree](#fasttree) - Make phylogenetic tree of multiple sequence alignment (alternative for FastTree)
 - [DADA2 taxonomic assignment](#dada2-taxonomic-assignment) - Assign taxonomy to ASVs and add species using SILVA v138.1 database
 - [Phyloseq](#phyloseq) - Process data in phyloseq objects
   - [Make phyloseq object](#make-phyloseq-object) - Make phyloseq object out of count table, tax table and tree (if present)

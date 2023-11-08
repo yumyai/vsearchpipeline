@@ -18,6 +18,7 @@ process PHYLOSEQ_MAKEOBJECT {
 
     script:
     def args = task.ext.args ?: ''
+    def treepresent = tree.name != 'NO_TREEFILE' ? "TRUE" : "FALSE"
 
     """
     #!/usr/bin/env Rscript
@@ -35,14 +36,16 @@ process PHYLOSEQ_MAKEOBJECT {
     asv_seqs <- as.character(dna)
     asvs_names <- names(asv_seqs)
     rownames(taxtable) <- asvs_names[match(rownames(taxtable), asv_seqs)]
-
-    tree <- ape::read.tree("$tree")
-    tree_rooted <- phytools::midpoint.root(tree)
-
     taxtable <- as.matrix(taxtable)
     counttable <- as.matrix(counttable)
 
-    ps <- phyloseq(otu_table(counttable, taxa_are_rows = TRUE), tax_table(taxtable), asv_seqs, tree_rooted)
+    if($treepresent == TRUE) {
+        tree <- ape::read.tree("$tree")
+        tree_rooted <- phytools::midpoint.root(tree)
+        ps <- phyloseq(otu_table(counttable, taxa_are_rows = TRUE), tax_table(taxtable), asv_seqs, tree_rooted)
+    } else{
+        ps <- phyloseq(otu_table(counttable, taxa_are_rows = TRUE), tax_table(taxtable), asv_seqs)
+    }
     ps@refseq <- dna
     ps
     nsamples(ps)
@@ -65,6 +68,7 @@ process PHYLOSEQ_MAKEOBJECT {
     def args = task.ext.args ?: ''
     """
     touch phyloseq.RDS
+    touch phylo_raw_taxtable.csv
 
     writeLines(paste0("\\"${task.process}\\":\n", 
             paste0("    R: ", paste0(R.Version()[c("major","minor")], collapse = "."), "\n"),

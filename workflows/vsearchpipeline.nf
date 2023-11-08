@@ -44,7 +44,8 @@ include { VSEARCH_CLUSTERUNOISE }                                   from '../mod
 include { VSEARCH_UCHIMEDENOVO }                                    from '../modules/local/vsearch/uchimedenovo'
 include { VSEARCH_USEARCHGLOBAL }                                   from '../modules/local/vsearch/usearchglobal'
 include { MAFFT }                                                   from '../modules/local/mafft'
-include { VERYFASTTREE }                                            from '../modules/local/veryfasttree'
+include { FASTTREE }                                                from '../modules/local/fasttree'
+include { IQTREE }                                                  from '../modules/local/iqtree'
 include { SILVADATABASES }                                          from '../modules/local/silvadatabases'
 include { DADA2_ASSIGNTAXONOMY }                                    from '../modules/local/dada2/assigntaxonomy'
 include { PHYLOSEQ_MAKEOBJECT as PHYLOSEQ_COMPLETE_MAKEOBJECT }     from '../modules/local/phyloseq/makeobject'
@@ -188,21 +189,38 @@ workflow VSEARCHPIPELINE {
         params.usearch_id
     )
     ch_versions = ch_versions.mix(VSEARCH_USEARCHGLOBAL.out.versions)
-    //
-    // MODULE: MAFFT for multiple sequence alignment
-    //
-    MAFFT (
-        VSEARCH_UCHIMEDENOVO.out.asvs
-    )
-    ch_versions = ch_versions.mix(MAFFT.out.versions)
-    //
-    // MODULE: Make tree with veryfasttree (fasttree with double precision)
-    //
-    VERYFASTTREE (
-        MAFFT.out.msa,
-        params.tree_doubleprecision
-    )
-    ch_versions = ch_versions.mix(VERYFASTTREE.out.versions)
+    
+    if(params.skip_tree != true){
+        //
+        // MODULE: MAFFT for multiple sequence alignment
+        //
+        MAFFT (
+            VSEARCH_UCHIMEDENOVO.out.asvs
+        )
+        ch_versions = ch_versions.mix(MAFFT.out.versions)
+
+        //
+        // MODULE: Build tree with FastTree or IQTree
+        //
+        if(params.treetool == "fasttree") {
+            FASTTREE (
+                MAFFT.out.msa
+            )
+            ch_versions = ch_versions.mix(FASTTREE.out.versions)
+            ch_tree = FASTTREE.out.tree
+        }
+
+        if(params.treetool == "iqtree") {
+            IQTREE (
+                MAFFT.out.msa
+            )
+            ch_versions = ch_versions.mix(IQTREE.out.versions)
+            ch_tree = IQTREE.out.tree
+        }
+    } else {
+        ch_tree = Channel.fromPath("$projectDir/assets/NO_TREEFILE")
+    }
+    
     // 
     // MODULE: Download SILVA if not already present in db folder
     //
@@ -227,7 +245,7 @@ workflow VSEARCHPIPELINE {
     PHYLOSEQ_COMPLETE_MAKEOBJECT (
         VSEARCH_UCHIMEDENOVO.out.asvs,
         VSEARCH_USEARCHGLOBAL.out.counts,
-        VERYFASTTREE.out.tree,
+        ch_tree,
         DADA2_ASSIGNTAXONOMY.out.taxtable
     )
 

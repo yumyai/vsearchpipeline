@@ -262,11 +262,13 @@
                 },
                 "merge_minlen": {
                     "type": "integer",
+                    "default": 0,
                     "description": "Fastq merge process: Discard input sequences shorter than the specified number of bases",
                     "fa_icon": "fas fa-ruler-horizontal"
                 },
                 "merge_maxlen": {
                     "type": "integer",
+                    "default": 0,
                     "description": "Fastq merge process: Discard sequences longer than the specified number of bases",
                     "fa_icon": "fas fa-ruler-vertical"
                 },
@@ -353,11 +355,12 @@
             "description": "",
             "default": "",
             "properties": {
-                "tree_doubleprecision": {
-                    "type": "boolean",
-                    "default": true,
-                    "help_text": "Double precision can help mitigate issues related to numerical instability in tree construction algorithms. Phylogenetic tree construction algorithms involve many iterative numerical calculations, and using double precision can reduce the risk of round-off errors and other numerical issues that can affect the results.",
-                    "description": "VeryFastTree with double precision",
+                "treetool": {
+                    "type": "string",
+                    "default": "fasttree",
+                    "help_text": "Default is FastTree ('fasttree'), alternative is IQTree ('iqtree')",
+                    "enum": ["fasttree", "iqtree"],
+                    "description": "Which tree building tool to use",
                     "fa_icon": "fas fa-dna"
                 }
             },
@@ -413,6 +416,11 @@
                 "skip_primers": {
                     "type": "boolean",
                     "description": "Skip trimming of primers",
+                    "fa_icon": "fas fa-forward"
+                },
+                "skip_tree": {
+                    "type": "boolean",
+                    "description": "Skip multiple sequence alignment and tree processes",
                     "fa_icon": "fas fa-forward"
                 },
                 "skip_rarefaction": {

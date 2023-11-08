@@ -23,7 +23,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - [VeryFastTree](#veryfasttree) - Make phylogenetic tree of multiple sequence alignment
 - [DADA2 taxonomic assignment](#dada2-taxonomic-assignment) - Assign taxonomy to ASVs and add species using SILVA v138.1 database
 - [Phyloseq](#phyloseq) - Process data in phyloseq objects
-  - [Make phyloseq object](#make-phyloseq-object) - Make phyloseq object out of count table, tax table and tree
+  - [Make phyloseq object](#make-phyloseq-object) - Make phyloseq object out of count table, tax table and tree (if present)
   - [Rarefaction](#rarefaction) - Rarefy count table (experimental feature)
   - [Nicer taxonomy](#nicer-taxonomy) - Make 'nice' taxonomic names from different columns depending on known phylogenetic levels
 - [MultiQC](#multiqc) - Aggregate report describing results and QC from the whole pipeline
@@ -102,17 +102,30 @@ The `cluster_unoise` function is used to denoise fasta sequences with the defaul
 
 [MAFFT](https://mafft.cbrc.jp/alignment/software/) is a tool for multiple sequence alignment (msa). We need the msa to make a phylogenetic tree.
 
-### VeryFastTree
+### Fasttree
 
 <details markdown="1">
 <summary>Output files</summary>
 
-- `veryfasttree/`
+- `fasttree/`
   - `asvs.msa.tree`: phylogenetic tree of ASVs
 
 </details>
 
-[VeryFastTree](https://github.com/citiususc/veryfasttree) is a tool for inferring a phylogenetic tree. It is used by default with double precision in this pipeline. It is much faster than FastTree-2, as also described in the documentation.
+[FastTree](https://www.microbesonline.org/fasttree/) is a tool for inferring a phylogenetic tree. It is the default tool in this pipeline.
+
+### IQTree
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `iqtree/`
+  - `asvs.msa.treefile`: phylogenetic tree of ASVs
+  - `asvs.msa.log`: log file of tree building process
+
+</details>
+
+[IQTree](https://github.com/citiususc/veryfasttree) is a tool for inferring a phylogenetic tree. It is not the default tool in this pipeline, so if you want to use IQTree instead of Fasttree, you have to set `--treetool` to 'iqtree'. It takes much longer than Fasttree to run but has a higher accuracy.
 
 ### DADA2: taxonomic assignment
 
@@ -163,7 +176,7 @@ The `cluster_unoise` function is used to denoise fasta sequences with the defaul
 </details>
 
 #### Make phyloseq object
-[Phyloseq](https://joey711.github.io/phyloseq/index.html) is an R package for handling 16S data. The different dimensions of the data can be stored in one phyloseq object, in this case `phyloseq.RDS`. 
+[Phyloseq](https://joey711.github.io/phyloseq/index.html) is an R package for handling 16S data. The different dimensions of the data can be stored in one phyloseq object, in this case `phyloseq.RDS`. If there is a phylogenetic tree (i.e. `--skip_tree` is not set), the tree wil also be stored in the phyloseq object.
 
 #### Rarefaction
 As an optional feature, this pipeline also has a process to rarefy data. It's however better to do this separately after inspecting the data carefully. The rules this process now uses for determining the rarefaction level are as follows:

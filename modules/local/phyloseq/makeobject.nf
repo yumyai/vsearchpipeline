@@ -33,6 +33,7 @@ process PHYLOSEQ_MAKEOBJECT {
     rownames(taxtable) <- taxtable[,1]
     taxtable[,1] <- NULL
 
+
     asv_seqs <- as.character(dna)
     asvs_names <- names(asv_seqs)
     rownames(taxtable) <- asvs_names[match(rownames(taxtable), asv_seqs)]

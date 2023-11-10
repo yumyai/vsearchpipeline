@@ -57,8 +57,8 @@ process PHYLOSEQ_RAREFACTION {
                                         rngseed = $seed, replace = FALSE, 
                                         trimOTUs = TRUE, verbose = TRUE)
         
-        numbers_after_rarefaction <- paste0('The phyloseq object has ', nsamples(phylo), ' samples and',
-                    ntaxa(phylo), ' taxa. \n')
+        numbers_after_rarefaction <- paste0('The phyloseq object has ', nsamples(phylo_rare), ' samples and ',
+                    ntaxa(phylo_rare), ' taxa. \n')
         print(numbers_after_rarefaction)
         report <- paste0(numbers_before_rarefaction, 
                             rarefaction_yesno, 

@@ -25,7 +25,7 @@ process PHYLOSEQ_METRICS {
 
     """
     #!/usr/bin/env Rscript
-    ## Libraries
+
     library(phyloseq)
     library(dplyr)
     library(ggplot2)
@@ -33,7 +33,6 @@ process PHYLOSEQ_METRICS {
     library(vegan)
     library(forcats)
 
-    ## Functions
     cols <- c("darkgreen", 'firebrick', "navy", "dodgerblue",  "goldenrod2", "chartreuse4", "darkorange2", "rosybrown1", "darkred", "lightskyblue",
             "seagreen", "gold1", "olivedrab", "royalblue", "linen", "maroon4", "mediumturquoise", "plum2", "darkslateblue", "sienna", "grey70", "grey90")
 
@@ -103,7 +102,7 @@ process PHYLOSEQ_METRICS {
 
     tab <- as(phy@otu_table, 'matrix')
     counts <- sample_sums(phy@otu_table)
-    tab <- as.data.frame(t(tab/sample_sums(phy))*100)
+    tab <- as.data.frame(t(tab)/counts*100)
     tab_comp <- tab
     tab_comp\$Sample <- rownames(tab_comp)
     rowSums(tab) # samples should all sum up to 100%

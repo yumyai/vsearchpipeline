@@ -23,6 +23,7 @@ process IQTREE {
     """
     iqtree \\
         -s ${msa} \\
+        -n 0 \\
         -m GTR+R10  \\
         -T AUTO
     

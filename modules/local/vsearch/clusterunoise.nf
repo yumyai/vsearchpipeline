@@ -1,5 +1,6 @@
 process VSEARCH_CLUSTERUNOISE {
     label 'process_multi_verylow'
+    label 'error_retry'
     label 'vsearch'
     
     input:

@@ -1,5 +1,6 @@
 process VSEARCH_USEARCHGLOBAL {
     label 'process_highcpu'
+    label 'error_retry'
     label 'vsearch'
 
     input:

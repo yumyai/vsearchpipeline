@@ -31,7 +31,7 @@ process PHYLOSEQ_RAREFACTION {
     print(numbers_before_rarefaction)
     
     ## Calculated rarefaction level
-    rarelevel <- mean(colSums(phylo@otu_table)) - 2*sd(rowSums(phylo@otu_table))
+    rarelevel <- mean(colSums(phylo@otu_table)) - 3*sd(rowSums(phylo@otu_table))
     if(rarelevel <= 15000){ rarelevel <- median(colSums(phylo@otu_table)) - IQR(colSums(phylo@otu_table)) }
     if(rarelevel <= 15000){ rarelevel <- 15000}
     if(all(colSums(phylo@otu_table) < 15000)){ rarelevel <- min(colSums(phylo@otu_table))}

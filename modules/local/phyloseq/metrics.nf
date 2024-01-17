@@ -1,5 +1,5 @@
 process PHYLOSEQ_METRICS {
-    label 'process_multi_low'
+    label 'process_multi_med'
     label 'phyloseq'
 
     input:

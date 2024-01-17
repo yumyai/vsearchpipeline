@@ -21,7 +21,7 @@ process SILVADATABASES {
     
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        SILVA: 138.1
+        SILVA: 132
     END_VERSIONS
     """
 

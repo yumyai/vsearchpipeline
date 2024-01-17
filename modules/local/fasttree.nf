@@ -28,7 +28,7 @@ process FASTTREE {
     
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        iqtree: \$(iqtree -help 2>&1 | head -n 1 | sed -n 's/.*\\([0-9]\\+\\.[0-9]\\+\\.[0-9]\\+\\).*/\\1/p')
+        fasttree: \$(fasttree -help 2>&1 | head -n 1 | sed -n 's/.*\\([0-9]\\+\\.[0-9]\\+\\.[0-9]\\+\\).*/\\1/p')
     END_VERSIONS
     """
 

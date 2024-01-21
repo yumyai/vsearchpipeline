@@ -41,6 +41,7 @@ include { VSEARCH_FASTQFILTER }                                     from '../mod
 include { VSEARCH_DEREPFULLLENGTH }                                 from '../modules/local/vsearch/derepfulllength'
 include { VSEARCH_DEREPFULLLENGTHALL }                              from '../modules/local/vsearch/derepfulllengthall'
 include { VSEARCH_CLUSTERUNOISE }                                   from '../modules/local/vsearch/clusterunoise'
+include { VSEARCH_SORT_REMOVE_SINGLETONS }                          from '../modules/local/vsearch/sort_remove_singletons'
 include { VSEARCH_UCHIMEDENOVO }                                    from '../modules/local/vsearch/uchimedenovo'
 include { VSEARCH_USEARCHGLOBAL }                                   from '../modules/local/vsearch/usearchglobal'
 include { MAFFT }                                                   from '../modules/local/mafft'
@@ -174,11 +175,19 @@ workflow VSEARCHPIPELINE {
         params.cluster_minsize,
         params.cluster_alpha
     )
+    // 
+    // MODULE: VSEARCH sort and remove singletons
+    //
+    VSEARCH_SORT_REMOVE_SINGLETONS (
+        VSEARCH_CLUSTERUNOISE.out.asvs,
+        params.sort_fastawidth,
+        params.sort_minsize
+    )
     //
     // MODULE: VSEARCH chimera detection
     //
     VSEARCH_UCHIMEDENOVO (
-        VSEARCH_CLUSTERUNOISE.out.asvs,
+        VSEARCH_SORT_REMOVE_SINGLETONS.out.asvs,
         params.uchime_label
     )
     //

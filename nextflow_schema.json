@@ -266,6 +266,12 @@
                     "description": "Fastq merge process: Discard input sequences shorter than the specified number of bases",
                     "fa_icon": "fas fa-ruler-horizontal"
                 },
+                "merge_maxdiffpct": {
+                    "type": "integer",
+                    "default": 100,
+                    "description": "Fastq merge process: maximum percentage of non-matching nucleotides allowed in the overlap region",
+                    "fa_icon": "fas fa-ruler-horizontal"
+                },
                 "merge_maxlen": {
                     "type": "integer",
                     "default": 0,
@@ -333,6 +339,18 @@
                     "default": 2.0,
                     "description": "Clustering",
                     "fa_icon": "fas fa-font"
+                },
+                "sort_fastawidth": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Sorting and removing singletons: fastawidth",
+                    "fa_icon": "fas fa-compress-alt"
+                },
+                "sort_minsize": {
+                    "type": "integer",
+                    "default": 2,
+                    "description": "Sorting and removing singletons: minsize",
+                    "fa_icon": "fas fa-compress-alt"
                 },
                 "uchime_label": {
                     "type": "string",

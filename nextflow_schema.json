@@ -273,7 +273,7 @@
                     "fa_icon": "fas fa-ruler-vertical"
                 },
                 "filter_maxee": {
-                    "type": "integer",
+                    "type": "number",
                     "default": 1,
                     "description": "Filtering process: Discard sequences with an expected error greater than the specified number",
                     "fa_icon": "fas fa-times"
@@ -329,8 +329,8 @@
                     "fa_icon": "fas fa-compress-alt"
                 },
                 "cluster_alpha": {
-                    "type": "integer",
-                    "default": 2,
+                    "type": "number",
+                    "default": 2.0,
                     "description": "Clustering",
                     "fa_icon": "fas fa-font"
                 },

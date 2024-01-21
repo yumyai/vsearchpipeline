@@ -130,7 +130,8 @@ workflow VSEARCHPIPELINE {
         params.merge_allowmergestagger,
         params.merge_maxdiffs,
         params.merge_minlen,
-        params.merge_maxlen
+        params.merge_maxlen,
+        params.merge_maxdiffpct
     )
 
     //

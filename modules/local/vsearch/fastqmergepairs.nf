@@ -10,6 +10,7 @@ process VSEARCH_FASTQMERGEPAIRS {
     val maxdiffs
     val minlength
     val maxlength
+    val maxdiffpct
 
     output:
     tuple val(meta), path("*.merged.fastq.gz")  , emit: reads
@@ -28,6 +29,7 @@ process VSEARCH_FASTQMERGEPAIRS {
     def maxdiffs = maxdiffs ? "--fastq_maxdiffs ${maxdiffs}" : ''
     def minmerge = minlength != 0 ? "--fastq_minmergelen ${minlength}" : ''
     def maxmerge = maxlength != 0 ? "--fastq_maxmergelen ${maxlength}" : ''
+    def maxdiffpct = maxdiffpct != 100 ? "--fastq_maxdiffpct ${maxdiffpct}" : ''
 
     """
     vsearch \\
@@ -37,7 +39,8 @@ process VSEARCH_FASTQMERGEPAIRS {
         ${allowmergestagger} \\
         ${minmerge} \\
         ${maxmerge} \\
-        --fastq_allowmergestagger \\
+        ${maxdiffpct} \\
+        ${allowmergestagger} \\
         --fastqout ${merged}
     """
 
@@ -47,10 +50,11 @@ process VSEARCH_FASTQMERGEPAIRS {
     def fwd_reads = reads[0]
     def rev_reads = reads[1]
     def merged = "${prefix}.merged.fastq.gz"
-    def allowmergestagger = stagger ? "--fastq_allowmergestagger" : ''
+    def allowmergestagger = allowmergestagger ? "--fastq_allowmergestagger" : ''
     def maxdiffs = $maxdiffs ? "--fastq_maxdiffs ${maxdiffs}" : ''
     def minmerge = $minlength ? "--fastq_minmergelen ${minlength}" : ''
     def maxmerge = $maxlength ? "--fastq_maxmergelen ${maxlength}" : ''
+    def maxdiffpct = maxdiffpct != 100 ? "--fastq_maxdiffpct ${maxdiffpct}" : ''
     """
     touch ${merged}
     """

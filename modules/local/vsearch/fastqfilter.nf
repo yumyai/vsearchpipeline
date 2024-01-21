@@ -24,7 +24,7 @@ process VSEARCH_FASTQFILTER {
     def filtered = "${prefix}.filtered.fastq"
     def min = minlength != 0 ? "--fastq_minlen ${minlength}" : ""
     def max = maxlength != 0 ? "--fastq_maxlen ${maxlength}" : ""
-    def maxns = maxns ? "--fastq_maxns ${maxns}" : ""
+    def maxns = maxns != 0 ? "--fastq_maxns ${maxns}" : ""
 
     """
     vsearch \\

@@ -367,23 +367,6 @@
             },
             "fa_icon": "fas fa-search"
         },
-        "tree_options": {
-            "title": "Tree options",
-            "type": "object",
-            "description": "",
-            "default": "",
-            "properties": {
-                "treetool": {
-                    "type": "string",
-                    "default": "fasttree",
-                    "help_text": "Default is FastTree ('fasttree'), alternative is IQTree ('iqtree')",
-                    "enum": ["fasttree", "iqtree"],
-                    "description": "Which tree building tool to use",
-                    "fa_icon": "fas fa-dna"
-                }
-            },
-            "fa_icon": "fab fa-pagelines"
-        },
         "dada2_options": {
             "title": "DADA2 options",
             "type": "object",
@@ -454,7 +437,6 @@
                 "skip_metrics": {
                     "type": "boolean",
                     "description": "Skip process to provide some general metrics of the phyloseq object (composition, diversity)",
-                    "default": false,
                     "fa_icon": "fas fa-forward"
                 }
             },
@@ -476,9 +458,6 @@
         },
         {
             "$ref": "#/definitions/vsearch_options"
-        },
-        {
-            "$ref": "#/definitions/tree_options"
         },
         {
             "$ref": "#/definitions/dada2_options"

@@ -46,7 +46,6 @@ include { VSEARCH_UCHIMEDENOVO }                                    from '../mod
 include { VSEARCH_USEARCHGLOBAL }                                   from '../modules/local/vsearch/usearchglobal'
 include { MAFFT }                                                   from '../modules/local/mafft'
 include { FASTTREE }                                                from '../modules/local/fasttree'
-include { IQTREE }                                                  from '../modules/local/iqtree'
 include { SILVADATABASES }                                          from '../modules/local/silvadatabases'
 include { DADA2_ASSIGNTAXONOMY }                                    from '../modules/local/dada2/assigntaxonomy'
 include { PHYLOSEQ_MAKEOBJECT as PHYLOSEQ_COMPLETE_MAKEOBJECT }     from '../modules/local/phyloseq/makeobject'
@@ -212,21 +211,11 @@ workflow VSEARCHPIPELINE {
         //
         // MODULE: Build tree with FastTree or IQTree
         //
-        if(params.treetool == "fasttree") {
             FASTTREE (
                 MAFFT.out.msa
             )
             ch_versions = ch_versions.mix(FASTTREE.out.versions)
             ch_tree = FASTTREE.out.tree
-        }
-
-        if(params.treetool == "iqtree") {
-            IQTREE (
-                MAFFT.out.msa
-            )
-            ch_versions = ch_versions.mix(IQTREE.out.versions)
-            ch_tree = IQTREE.out.tree
-        }
     } else {
         ch_tree = Channel.fromPath("$projectDir/assets/NO_TREEFILE")
     }

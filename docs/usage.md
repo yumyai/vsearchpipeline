@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This bioinformatic pipeline uses VSEARCH to generate a count table (samples+ASVs) from 16S sequencing reads. The input is a samplesheet with sample names and file paths to the fastq files, and a sheet with primer sequences if primer trimming is necessary. The pipeline uses DADA2 for taxonomic assignment (as opposed to VSEARCH sintax) using the SILVA v.138.1 database. The resulting count table, taxonomic table and phylogenetic tree resulting from the pipeline are stored in a phyloseq object. 
+This bioinformatic pipeline uses VSEARCH to generate a count table (samples+ASVs) from 16S sequencing reads. The input is a samplesheet with sample names and file paths to the fastq files, and a sheet with primer sequences if primer trimming is necessary. The pipeline uses DADA2 for taxonomic assignment (as opposed to VSEARCH sintax) using the SILVA v.138.1 database. The resulting count table, taxonomic table and phylogenetic tree resulting from the pipeline are stored in a phyloseq object.
 
 As an experimental feature, there is a rarefaction/pruning process and a process that assembles 'nice' assembled taxonomic names ('Roseburia spp.' if species level is unknown, Lachnospiraceae spp., if genus level is unknown, etcetera). It is possible to skip these processes. Either way, both the unrarefied and the rarefied phyloseq objects are stored in the output directory.
 
@@ -48,14 +48,17 @@ If you want the primers to be trimmed, you need to specify a file path to a csv 
 ```bash
 --primers '[path to primersheet file]'
 ```
+
 This csv should look as follows:
+
 ```console
 forward_primer, reverse_primer
 CCTACGGGAGGCAGCAG,TACNVGGGTATCTAAKCC
 ```
-| Column    | Description                                                                                                                                                                          |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `forward_primer`  | Sequence of the forward primer. All nucleotides and degenerate nucleotides are allowed characters. |
+
+| Column           | Description                                                                                        |
+| ---------------- | -------------------------------------------------------------------------------------------------- |
+| `forward_primer` | Sequence of the forward primer. All nucleotides and degenerate nucleotides are allowed characters. |
 | `reverse_primer` | Sequence of the reverse primer. All nucleotides and degenerate nucleotides are allowed characters. |
 
 An [example primersheet](../testdata/Primers.csv) has been provided with the pipeline.
@@ -104,16 +107,21 @@ outdir: './results/'
 You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
 
 ### HPC settings
-I had some problems getting Nextflow pipelines to work on an HPC. This is a short list of issues I encountered with solutions. These solutions are all implemented, although for slurm use and the job name replacement you have to use `-profile snellius`. 
+
+I had some problems getting Nextflow pipelines to work on an HPC. This is a short list of issues I encountered with solutions. These solutions are all implemented, although for slurm use and the job name replacement you have to use `-profile snellius`.
 
 #### Use singularity
+
 Docker usually does not work on HPCs for security reasons; the alternative is Singularity (or Apptainer). Run the pipeline with `-profile singularity`. If you use `-profile snellius`, singularity is also enabled.
 
 #### Retry failed jobs
+
 Because slurm jobs might occasionally fail, some processes have the `error_retry` label. With this label, jobs are retried 5 times before the pipeline fails. This is already implemented in the pipeline.
 
 #### Use slurm
+
 If you're using a scheduler on a computing cluster, you should define that in the process scope configuration file. The queue size and rate limit of job submissions are also defined. The configs below are used in the `-profile snellius` but with a specified partition name. Make sure you replace the partition name when using this profile on other computing clusters.
+
 ```
 process{
     executor = 'slurm'
@@ -122,8 +130,11 @@ process{
 	  submitRateLimit = '10 sec'
 }
 ```
+
 #### Job names with special characters
+
 On some HPCs, certain characters such as parentheses and columns are not allowed in the slurm job names. The configs below are used in the `-profile snellius`.
+
 ```
 executor{
     jobName = {
@@ -148,12 +159,12 @@ This version number will be logged in reports when you run the pipeline, so that
 
 To further assist in reproducbility, you can use share and re-use [parameter files](#running-the-pipeline) to repeat pipeline runs with the same settings without having to write out a command with every single parameter.
 
-> [!NOTE] 
+> [!NOTE]
 > If you wish to share such profile (such as upload as supplementary material for academic publications), make sure to NOT include cluster specific paths to files, nor institutional specific profiles.
 
 ## Core Nextflow arguments
 
-> [!NOTE] 
+> [!NOTE]
 > These options are part of Nextflow and use a _single_ hyphen (pipeline parameters use a double-hyphen).
 
 ### `-profile`
@@ -162,7 +173,7 @@ Use this parameter to choose a configuration profile. Profiles can give configur
 
 Several generic profiles are bundled with the pipeline which instruct the pipeline to use software packaged using different methods (Docker, Singularity, Apptainer, Conda) - see below.
 
-> [!IMPORTANT] 
+> [!IMPORTANT]
 > We highly recommend the use of Docker or Singularity containers for full pipeline reproducibility, however when this is not possible, Conda is also supported.
 
 The pipeline also dynamically loads configurations from [https://github.com/nf-core/configs](https://github.com/nf-core/configs) when it runs, making multiple config profiles for various institutional clusters available at run time. For more information and to see if your system is available in these configs please see the [nf-core/configs documentation](https://github.com/nf-core/configs#documentation).

@@ -1,4 +1,4 @@
-# VSEARCH nextflow pipeline 
+# VSEARCH nextflow pipeline
 
 [![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.10076630-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.10076630)
 
@@ -23,8 +23,8 @@
 
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how
-to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline)
-with `-profile test` before running the workflow on actual data.
+> to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline)
+> with `-profile test` before running the workflow on actual data.
 
 First, prepare a samplesheet with your input data that looks as follows:
 
@@ -34,6 +34,7 @@ First, prepare a samplesheet with your input data that looks as follows:
 sample,fastq_1,fastq_2
 CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
 ```
+
 Each row represents a pair of fastq files (paired-end).
 
 Then, prepare a sheet with the forward and reverse primers. This sheet should look as follows:
@@ -44,7 +45,8 @@ Then, prepare a sheet with the forward and reverse primers. This sheet should lo
 forward_primer, reverse_primer
 CCTACGGGAGGCAGCAG,TACNVGGGTATCTAAKCC
 ```
-If there are no primers to be trimmed, simply add the `--skip_primers` flag to the nextflow run command. 
+
+If there are no primers to be trimmed, simply add the `--skip_primers` flag to the nextflow run command.
 
 Now, you can run the pipeline using:
 
@@ -58,8 +60,8 @@ nextflow run nf-core/vsearchpipeline \
 
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those
-provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
-see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
+> provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
+> see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
 
 For more details and further functionality, please refer to the [usage documentation](https://github.com/barbarahelena/vsearchpipeline/blob/master/docs/usage.md) and the [parameter documentation](https://github.com/barbarahelena/vsearchpipeline/blob/master/docs/parameters.md).
 

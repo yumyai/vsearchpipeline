@@ -4,7 +4,6 @@
 
 This document describes the output produced by the pipeline. The directories listed below will be created in the results directory after the pipeline has finished. All paths are relative to the top-level results directory.
 
-
 ## Pipeline overview
 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
@@ -58,7 +57,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 <summary>Output files</summary>
 
 - `seqtk/`
-  - `*.trim.fastq.gz`: Trimmed reads. 
+  - `*.trim.fastq.gz`: Trimmed reads.
 
 </details>
 
@@ -82,9 +81,9 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 
 </details>
 
-In a series of seven [VSEARCH](https://github.com/torognes/vsearch/wiki/VSEARCH-pipeline) processes, the forward and reverse reads are translated into an ASV set and count table. 
+In a series of seven [VSEARCH](https://github.com/torognes/vsearch/wiki/VSEARCH-pipeline) processes, the forward and reverse reads are translated into an ASV set and count table.
 
-First, the reads are merged using `fastq_merge` (default maxdiffs 30, no minlen or maxlen setting), so that there is one fasta file per sample left. Next, `fastq_filter` is used to filter the reads (default maxee = 1 and maxns = 1, no minlen or maxlen filter), resulting in a filtered fasta file per sample. 
+First, the reads are merged using `fastq_merge` (default maxdiffs 30, no minlen or maxlen setting), so that there is one fasta file per sample left. Next, `fastq_filter` is used to filter the reads (default maxee = 1 and maxns = 1, no minlen or maxlen filter), resulting in a filtered fasta file per sample.
 
 Samples are then dereplicated per sample using `fastq_uniques`, resulting in a dereplicated fasta per sample. All dereplicated reads are then combined in one channel (`all.concat.fasta`) to be dereplicated again (default minunique=2), resulting in `all.derep.fasta`. This dereplicating process is performed twice since the dereplication is more efficient if first performed at sample-level - in other words, the first round per sample is mostly for compression purposes.
 
@@ -163,25 +162,29 @@ The `cluster_unoise` function is used to denoise fasta sequences with the VSEARC
 </details>
 
 #### Make phyloseq object
+
 [Phyloseq](https://joey711.github.io/phyloseq/index.html) is an R package for handling 16S data. The different dimensions of the data can be stored in one phyloseq object, in this case `phyloseq.RDS`. If there is a phylogenetic tree (i.e. `--skip_tree` is not set), the tree wil also be stored in the phyloseq object.
 
 #### Rarefaction
+
 As an optional feature, this pipeline also has a process to rarefy data. It's however better to do this separately after inspecting the data carefully. The rules this process now uses for determining the rarefaction level are as follows:
+
 - Rarefaction level as defined by `rarelevel` parameter, if set; otherwise,
-- Mean - 3SDs: if that is >15000; 
-- Median - IQR: if that is >15000; 
+- Mean - 3SDs: if that is >15000;
+- Median - IQR: if that is >15000;
 - 15000;
 - If there's no samples left above >15000; minimum total counts of the samples.
-Empty ASVs are trimmed from the dataset after this procedure. The rarefied phyloseq is saved as `phyloseq_rarefied.RDS`. The plots with the distribution of sample counts are saved as `rarefaction_plot.pdf`.
+  Empty ASVs are trimmed from the dataset after this procedure. The rarefied phyloseq is saved as `phyloseq_rarefied.RDS`. The plots with the distribution of sample counts are saved as `rarefaction_plot.pdf`.
 
 The processes for nicer taxonomy and metrics are both executed on the complete phyloseq object and the rarefied phyloseq object. If `skip_taxonomy` is set to true, the metrics won't be generated either because this process depends on the assembled taxonomy resulting from the taxonomy process.
 
 #### Nicer taxonomy
+
 The process in which the taxonomy levels are made into one taxonomy name for publication (e.g. 'Roseburia hominis' or 'Roseburia spp.') are saved in `taxtable.RDS`. The known phylogenetic levels for all ASVs and the top 300 most abundant ASVs are saved in `phylogen_levels.csv` and `phylogen_levels_top300.csv`, respectively.
 
 #### Metrics
-In this process, compositional plots and diversity (Shannon, richness) histograms are made to give some overview of the output data. 
 
+In this process, compositional plots and diversity (Shannon, richness) histograms are made to give some overview of the output data.
 
 ### MultiQC
 

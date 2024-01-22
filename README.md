@@ -14,8 +14,8 @@
 1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 2. Trim primers ([`Seqtk`](https://github.com/lh3/seqtk))
 3. Infer ASVs and make count table ([`VSEARCH`](https://github.com/torognes/vsearch))
-4. Multiple sequence alignment ([`MAFFT`]()) to make phylogenetic tree ([`VeryFastTree`](https://github.com/citiususc/veryfasttree))
-5. Taxonomic assignment ([`DADA2`](https://benjjneb.github.io/dada2/)) using SILVA 138.1 database for DADA2
+4. Multiple sequence alignment ([`MAFFT`]()) to make phylogenetic tree ([`Fasttree`](https://www.microbesonline.org/fasttree/))
+5. Taxonomy assignment ([`DADA2`](https://benjjneb.github.io/dada2/)) using SILVA 138.1 database for DADA2
 6. Phyloseq object with count table, taxonomic table and phylogenetic tree ([`Phyloseq`](https://joey711.github.io/phyloseq/))
 7. MultiQC report ([`MultiQC`](http://multiqc.info/))
 
@@ -63,26 +63,16 @@ see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
 
 For more details and further functionality, please refer to the [usage documentation](https://github.com/barbarahelena/vsearchpipeline/blob/master/docs/usage.md) and the [parameter documentation](https://github.com/barbarahelena/vsearchpipeline/blob/master/docs/parameters.md).
 
-
 ## Pipeline output
+
 All output of the different parts of the pipeline are stored in subdirectories of the output directory. These directories are named after the tools that were used ('vsearch', 'dada2', etc.). In the phyloseq folder, you can find the end result of the pipeline, which is the phyloseq object. Other important outputs are the multiqc report in the multiqc folder and the execution html report in the pipeline_info folder.
 
 For more details on the pipeline output, please refer to the [output documentation](https://github.com/barbarahelena/vsearchpipeline/blob/master/docs/output.md).
 
 ## Credits
 
-This pipeline uses the nf-core template (as much as possible).
+This pipeline uses the nf-core template as much as possible.
 
 ## Citations
 
-If you use  nf-core/vsearchpipeline for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX)
-
-An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
-
-You can cite the `nf-core` publication as follows:
-
-> **The nf-core framework for community-curated bioinformatics pipelines.**
->
-> Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.
->
-> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).
+If you use this VSEARCH workflow for your analysis, please cite it using the following doi: [10.5281/zenodo.10076629](https://doi.org/10.5281/zenodo.10076629). An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.

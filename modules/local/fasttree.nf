@@ -4,7 +4,7 @@ process FASTTREE {
     conda "bioconda::fasttree=2.1.11"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/fasttree%3A2.1.11--hec16e2b_1':
-        'biocontainers/fasttree--hec16e2b_1' }"
+        'biocontainers/fasttree:2.1.11--hec16e2b_1' }"
 
     input:
     path msa

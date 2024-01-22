@@ -17,11 +17,11 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
   - [dereplicate sample](#vsearch) - Dereplicate reads per sample
   - [dereplicate all](#vsearch) - Dereplicate all reads
   - [cluster_unoise](#vsearch) - Cluster reads into ASVs
+  - [singleton_removal](#vsearch) - Sort and remove singletons
   - [uchime_denovo](#vsearch) - Remove chimeras with uchime_denovo method
   - [usearch_global](#vsearch) - Make count table from ASVs and dereplicated reads
 - [MAFFT](#mafft) - Multiple sequence alignment of ASVs
 - [FastTree](#fasttree) - Make phylogenetic tree of multiple sequence alignment
-- [IQTree](#fasttree) - Make phylogenetic tree of multiple sequence alignment (alternative for FastTree)
 - [DADA2 taxonomic assignment](#dada2-taxonomic-assignment) - Assign taxonomy to ASVs and add species using SILVA v138.1 database
 - [Phyloseq](#phyloseq) - Process data in phyloseq objects
   - [Make phyloseq object](#make-phyloseq-object) - Make phyloseq object out of count table, tax table and tree (if present)
@@ -29,7 +29,6 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
   - [Nicer taxonomy](#nicer-taxonomy) - Make 'nice' taxonomic names from different columns depending on known phylogenetic levels
 - [MultiQC](#multiqc) - Aggregate report describing results and QC from the whole pipeline
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
-
 
 ### FastQC
 
@@ -89,7 +88,7 @@ First, the reads are merged using `fastq_merge` (default maxdiffs 30, no minlen 
 
 Samples are then dereplicated per sample using `fastq_uniques`, resulting in a dereplicated fasta per sample. All dereplicated reads are then combined in one channel (`all.concat.fasta`) to be dereplicated again (default minunique=2), resulting in `all.derep.fasta`. This dereplicating process is performed twice since the dereplication is more efficient if first performed at sample-level - in other words, the first round per sample is mostly for compression purposes.
 
-The `cluster_unoise` function is used to denoise fasta sequences with the defaults for minsize (8) and alpha (2) as defined by VSEARCH itself, resulting in `asvs.clustered.fasta`. Chimeras are removed using the `uchime3_denovo` method that uses the UNOISE version 3 algorithm by Robert Edgar. Both chimeras that are filtered out (`chimeras.fasta`) and ASVs without chimeras (`asvs_nonchimeras.fasta`), labelled with `ASV_` followed by a number, are saved. Using global pairwise alignment with `usearch_global`, target sequences `all.concat.fasta` are compared to `asv_nonchimeras.fasta`.
+The `cluster_unoise` function is used to denoise fasta sequences with the VSEARCH defaults for minsize (8) and alpha (2), resulting in `asvs.clustered.fasta`. ASVs are then sorted using `sortbysize` and singletons are removed (minsize set at 2), resulting in `asvs_nonsingle.fasta`. Chimeras are removed using the `uchime3_denovo` method that uses the UNOISE version 3 algorithm by Robert Edgar. Both chimeras that are filtered out (`chimeras.fasta`) and ASVs without chimeras (`asvs_nonchimeras.fasta`), labelled with `ASV_` followed by a number, are saved. Using global pairwise alignment with `usearch_global`, target sequences `all.concat.fasta` are compared to `asv_nonchimeras.fasta`.
 
 ### MAFFT
 
@@ -114,19 +113,6 @@ The `cluster_unoise` function is used to denoise fasta sequences with the defaul
 </details>
 
 [FastTree](https://www.microbesonline.org/fasttree/) is a tool for inferring a phylogenetic tree. It is the default tool in this pipeline.
-
-### IQTree
-
-<details markdown="1">
-<summary>Output files</summary>
-
-- `iqtree/`
-  - `asvs.msa.treefile`: phylogenetic tree of ASVs
-  - `asvs.msa.log`: log file of tree building process
-
-</details>
-
-[IQTree](https://github.com/citiususc/veryfasttree) is a tool for inferring a phylogenetic tree. It is not the default tool in this pipeline, so if you want to use IQTree instead of Fasttree, you have to set `--treetool` to 'iqtree'. It takes much longer than Fasttree to run but has a higher accuracy.
 
 ### DADA2: taxonomic assignment
 
@@ -182,7 +168,7 @@ The `cluster_unoise` function is used to denoise fasta sequences with the defaul
 #### Rarefaction
 As an optional feature, this pipeline also has a process to rarefy data. It's however better to do this separately after inspecting the data carefully. The rules this process now uses for determining the rarefaction level are as follows:
 - Rarefaction level as defined by `rarelevel` parameter, if set; otherwise,
-- Mean - 2SDs: if that is >15000; 
+- Mean - 3SDs: if that is >15000; 
 - Median - IQR: if that is >15000; 
 - 15000;
 - If there's no samples left above >15000; minimum total counts of the samples.

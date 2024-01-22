@@ -66,6 +66,7 @@ process PHYLOSEQ_RAREFACTION {
                             numbers_after_rarefaction)
     } else{
         rarefaction_yesno <- 'Phyloseq object seems already rarefied.\n'
+        rarelevel <- ifelse($rarelevel !=0, $rarelevel, 0)
         print(rarefaction_yesno)
         report <- paste0(numbers_before_rarefaction, 
                             rarefaction_yesno)
@@ -77,7 +78,7 @@ process PHYLOSEQ_RAREFACTION {
     rarepl <- ggplot(raredf, aes(x = rarefaction)) +
                 geom_histogram(color = "black", 
                             fill = "royalblue", alpha = 0.8) +
-                geom_vline(aes(xintercept = 15000), color = "firebrick") + 
+                geom_vline(aes(xintercept = rarelevel), color = "firebrick") + 
                 theme_minimal() +
                 xlab("Number of counts") +
                 ggtitle("Total counts distribution")

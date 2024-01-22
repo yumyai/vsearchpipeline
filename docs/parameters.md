@@ -29,7 +29,7 @@
 | DADA2 options            | dada2_minboot               | integer   | assignTaxonomy function: The minimum bootstrap confidence for assigning a taxonomic level. | 80            |          |
 |                         | dada2_allowmultiple         | integer   | addSpecies function: maximum number of multiple assigned species. If 0, this will be set at FALSE. | 3             |          |
 |                         | dada2_tryrevcompl           | boolean   | addSpecies function: If TRUE, the reverse-complement of each sequences will be used for classification if it is a better match to the reference sequences than the forward sequence. | true          |          |
-| Phyloseq options         | rarelevel                   | integer   | Rarefaction level (not used if skip_rarefaction is not set at true) | 0             |          |
+| Phyloseq options         | rarelevel                   | integer   | Rarefaction level (not used if skip_rarefaction is set at true) | 0             |          |
 | Skip options             | skip_primers                | boolean   | Skip trimming of primers                                    | -             |          |
 |                         | skip_tree                   | boolean   | Skip multiple sequence alignment and tree processes           | -             |          |
 |                         | skip_rarefaction            | boolean   | Skip rarefaction of phyloseq object                           | -             |          |

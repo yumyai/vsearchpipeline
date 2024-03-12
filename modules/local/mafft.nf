@@ -1,9 +1,6 @@
 process MAFFT {
     label 'process_single_low'
-    conda "bioconda::mafft=7.520"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mafft:7.520--hec16e2b_0-test-bot-free-upload':
-        'biocontainers/mafft:7.520--hec16e2b_0-test-bot-free-upload' }"
+    label 'mafft'
 
     input:
     path asvs

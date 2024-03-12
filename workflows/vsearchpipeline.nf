@@ -48,6 +48,7 @@ include { MAFFT }                                                   from '../mod
 include { FASTTREE }                                                from '../modules/local/fasttree'
 include { SILVADATABASES }                                          from '../modules/local/silvadatabases'
 include { DADA2_ASSIGNTAXONOMY }                                    from '../modules/local/dada2/assigntaxonomy'
+include { PICRUST2 }                                                 from '../modules/local/picrust2'
 include { PHYLOSEQ_MAKEOBJECT as PHYLOSEQ_COMPLETE_MAKEOBJECT }     from '../modules/local/phyloseq/makeobject'
 include { PHYLOSEQ_FIXTAXONOMY as PHYLOSEQ_COMPLETE_FIXTAX }        from '../modules/local/phyloseq/fixtaxonomy'
 include { PHYLOSEQ_METRICS as PHYLOSEQ_COMPLETE_METRICS }           from '../modules/local/phyloseq/metrics'
@@ -238,6 +239,16 @@ workflow VSEARCHPIPELINE {
     )
     ch_versions = ch_versions.mix(DADA2_ASSIGNTAXONOMY.out.versions)
 
+    //
+    // MODULE: PICRUST
+    //
+    if(params.skip_picrust != true){
+        PICRUST2 ( 
+            VSEARCH_UCHIMEDENOVO.out.asvs,
+            VSEARCH_USEARCHGLOBAL.out.counts
+        )
+        ch_versions = ch_versions.mix(PICRUST2.out.versions)
+    }
     //
     // MODULE: Make phyloseq object
     //

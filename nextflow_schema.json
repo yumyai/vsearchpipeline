@@ -424,6 +424,11 @@
                     "description": "Skip multiple sequence alignment and tree processes",
                     "fa_icon": "fas fa-forward"
                 },
+                "skip_picrust": {
+                    "type": "boolean",
+                    "description": "Skip picrust process",
+                    "fa_icon": "fas fa-forward"
+                },
                 "skip_rarefaction": {
                     "type": "boolean",
                     "description": "Skip rarefaction of phyloseq object",

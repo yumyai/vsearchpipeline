@@ -1,7 +1,7 @@
 process MULTIQC {
     label 'process_single'
     label 'error_retry'
-    time { 1.h * task.attempt }
+    time '1.h'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?

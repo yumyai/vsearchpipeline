@@ -10,6 +10,7 @@
 ## Introduction
 
 **vsearchpipeline** is a bioinformatics pipeline that uses [VSEARCH](https://github.com/torognes/vsearch) to infer ASVs and make a count table from 16S sequencing reads. The input is a samplesheet with sample names and file paths to the fastq files, and a sheet with primer sequences if primer trimming is necessary. The pipeline uses DADA2 for taxonomic assignment using the SILVA v.138.1 reference database. The resulting count table, taxonomic table and phylogenetic tree resulting from the pipeline are stored in a phyloseq object.
+![vsearch](https://github.com/user-attachments/assets/be411868-e12e-4a54-9b6d-60dad859814c)
 
 1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 2. Trim primers ([`Seqtk`](https://github.com/lh3/seqtk))

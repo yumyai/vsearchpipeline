@@ -42,3 +42,4 @@ def create_fastq_channel(LinkedHashMap row) {
     }
     return fastq_meta
 }
+

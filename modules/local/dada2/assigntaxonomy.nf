@@ -1,5 +1,6 @@
 process DADA2_ASSIGNTAXONOMY {
-    label 'process_multi_high'
+    //label 'process_multi_high'
+    label 'process_multi_med'
     label 'dada2'
 
     input:

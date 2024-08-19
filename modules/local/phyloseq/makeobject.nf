@@ -7,6 +7,7 @@ process PHYLOSEQ_MAKEOBJECT {
     path counttable
     path tree
     path taxtable
+    path metatable
 
     output:
     path "phyloseq.RDS"             , emit: phyloseq
@@ -32,20 +33,27 @@ process PHYLOSEQ_MAKEOBJECT {
     taxtable <- read.csv("$taxtable")
     rownames(taxtable) <- taxtable[,1]
     taxtable[,1] <- NULL
-
+    metatable <- read.csv("$metatable", row.names = 1)
+    # Check if the metatable has no columns
+    if (ncol(metatable) == 0) {
+      # Add a placeholder column with NA values
+      # Hack. Nextflow need column
+      metatable\$placeholder <- "placeholder"
+    }
 
     asv_seqs <- as.character(dna)
     asvs_names <- names(asv_seqs)
     rownames(taxtable) <- asvs_names[match(rownames(taxtable), asv_seqs)]
+    metatable <- sample_data(metatable)
     taxtable <- as.matrix(taxtable)
     counttable <- as.matrix(counttable)
 
     if($treepresent == TRUE) {
         tree <- ape::read.tree("$tree")
         tree_rooted <- phytools::midpoint.root(tree)
-        ps <- phyloseq(otu_table(counttable, taxa_are_rows = TRUE), tax_table(taxtable), asv_seqs, tree_rooted)
+        ps <- phyloseq(otu_table(counttable, taxa_are_rows = TRUE), tax_table(taxtable), asv_seqs, metatable, tree_rooted)
     } else{
-        ps <- phyloseq(otu_table(counttable, taxa_are_rows = TRUE), tax_table(taxtable), asv_seqs)
+        ps <- phyloseq(otu_table(counttable, taxa_are_rows = TRUE), tax_table(taxtable), asv_seqs, metatable )
     }
     ps@refseq <- dna
     ps

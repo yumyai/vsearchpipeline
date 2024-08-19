@@ -57,7 +57,7 @@ class RowChecker:
         self._seen = set()
         self.modified = []
 
-    def validate_and_transform(self, row):
+    def validate(self, row):
         """
         Perform all validations on the given row and insert the read pairing status.
 
@@ -73,12 +73,23 @@ class RowChecker:
         self._seen.add((row[self._sample_col], row[self._first_col]))
         self.modified.append(row)
 
+    def _check_sample_name(self, sample_name):
+        import re
+        if not sample_name[0].isalpha():
+            raise ValueError("Samplename must start with an alphabetic character (A-Z or a-z).")
+
+        if not re.match(r'^[A-Za-z0-9_]+$', sample_name):
+            raise ValueError("Samplename must contain only alphanumeric characters (A-Z, a-z, 0-9) or underscores (_), with no spaces or special characters.")
+
     def _validate_sample(self, row):
-        """Assert that the sample name exists and convert spaces to underscores."""
+        """Assert that the sample name exists and in the correct format."""
         if len(row[self._sample_col]) <= 0:
             raise AssertionError("Sample input is required.")
+        # raise error if sample name is sligtly off.
+        self._check_sample_name(row[self._sample_col])
+
         # Sanitize samples slightly.
-        row[self._sample_col] = row[self._sample_col].replace(" ", "_")
+        #row[self._sample_col] = row[self._sample_col].replace(" ", "_")
 
     def _validate_first(self, row):
         """Assert that the first FASTQ entry is non-empty and has the right format."""
@@ -114,8 +125,7 @@ class RowChecker:
         """
         Assert that the combination of sample name and FASTQ filename is unique.
 
-        In addition to the validation, also rename all samples to have a suffix of _T{n}, where n is the
-        number of times the same sample exist, but with different FASTQ files, e.g., multiple runs per experiment.
+        if all samples don't hhave a unique name, raise error.
 
         """
         if len(self._seen) != len(self.modified):
@@ -124,7 +134,9 @@ class RowChecker:
         for row in self.modified:
             sample = row[self._sample_col]
             seen[sample] += 1
-            row[self._sample_col] = f"{sample}_T{seen[sample]}"
+            if seen[sample] > 1:
+                raise ValueError(f"Sample ID '{sample}' is not unique.")
+            #row[self._sample_col] = f"{sample}_T{seen[sample]}"
 
 
 def read_head(handle, num_lines=10):
@@ -198,7 +210,7 @@ def check_samplesheet(file_in, file_out):
         checker = RowChecker()
         for i, row in enumerate(reader):
             try:
-                checker.validate_and_transform(row)
+                checker.validate(row)
             except AssertionError as error:
                 logger.critical(f"{str(error)} On line {i + 2}.")
                 sys.exit(1)

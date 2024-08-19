@@ -47,14 +47,17 @@ include { VSEARCH_USEARCHGLOBAL }                                   from '../mod
 include { MAFFT }                                                   from '../modules/local/mafft'
 include { FASTTREE }                                                from '../modules/local/fasttree'
 include { SILVADATABASES }                                          from '../modules/local/silvadatabases'
+include { RDPDATABASES }                                            from '../modules/local/rdpdatabases'
 include { DADA2_ASSIGNTAXONOMY }                                    from '../modules/local/dada2/assigntaxonomy'
-include { PICRUST2 }                                                 from '../modules/local/picrust2'
+include { PICRUST2 }                                                from '../modules/local/picrust2'
 include { PHYLOSEQ_MAKEOBJECT as PHYLOSEQ_COMPLETE_MAKEOBJECT }     from '../modules/local/phyloseq/makeobject'
 include { PHYLOSEQ_FIXTAXONOMY as PHYLOSEQ_COMPLETE_FIXTAX }        from '../modules/local/phyloseq/fixtaxonomy'
 include { PHYLOSEQ_METRICS as PHYLOSEQ_COMPLETE_METRICS }           from '../modules/local/phyloseq/metrics'
 include { PHYLOSEQ_RAREFACTION as PHYLOSEQ_RAREFIED }               from '../modules/local/phyloseq/rarefaction'
 include { PHYLOSEQ_METRICS as PHYLOSEQ_RAREFIED_METRICS }           from '../modules/local/phyloseq/metrics'
 include { PHYLOSEQ_FIXTAXONOMY as PHYLOSEQ_RAREFIED_FIXTAX }        from '../modules/local/phyloseq/fixtaxonomy'
+
+include { EXTRACT_METADATA }                                        from '../modules/local/extract_metadata.nf'
 
 
 //
@@ -84,6 +87,7 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 // Info required for completion email and summary
 def multiqc_report = []
 
+
 workflow VSEARCHPIPELINE {
     ch_versions = Channel.empty()
 
@@ -94,9 +98,16 @@ workflow VSEARCHPIPELINE {
         file(params.input)
     )
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
-    //
-    // SUBWORKFLOW: Read in samplesheet, validate and stage input files
-    //
+
+    // extract metadata to be used later
+    EXTRACT_METADATA(file(params.input))
+
+    // If primers parameter doesn't exists,
+    if (!params.primers && !params.skip_primers) {
+      log.warn "Warning: --primers argument not specified."
+      exit(1)
+    } 
+
     if(!params.skip_primers){
         PRIMERS_CHECK (
             file(params.primers)
@@ -225,6 +236,7 @@ workflow VSEARCHPIPELINE {
     // MODULE: Download SILVA if not already present in db folder
     //
     SILVADATABASES()
+    RDPDATABASES()
     
     // 
     // MODULE: DADA2 Assign taxonomy with SILVA db
@@ -237,6 +249,7 @@ workflow VSEARCHPIPELINE {
         params.dada2_allowmultiple,
         params.dada2_tryrevcompl
     )
+
     ch_versions = ch_versions.mix(DADA2_ASSIGNTAXONOMY.out.versions)
 
     //
@@ -256,7 +269,8 @@ workflow VSEARCHPIPELINE {
         VSEARCH_UCHIMEDENOVO.out.asvs,
         VSEARCH_USEARCHGLOBAL.out.counts,
         ch_tree,
-        DADA2_ASSIGNTAXONOMY.out.taxtable
+        DADA2_ASSIGNTAXONOMY.out.taxtable,
+        EXTRACT_METADATA.out.metatable
     )
 
     ch_phyloseq = PHYLOSEQ_COMPLETE_MAKEOBJECT.out.phyloseq
@@ -273,9 +287,9 @@ workflow VSEARCHPIPELINE {
             ch_complete
         )
         ch_taxtable = PHYLOSEQ_COMPLETE_FIXTAX.out.taxonomy
-        // //
-        // // MODULE: Overview metrics
-        // //
+        //
+        // MODULE: Overview metrics
+        //
         if (!params.skip_metrics) {
             PHYLOSEQ_COMPLETE_METRICS (
                 ch_phyloseq,
@@ -369,3 +383,4 @@ workflow.onComplete {
     THE END
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+

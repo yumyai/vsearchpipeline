@@ -20,6 +20,7 @@ process PHYLOSEQ_FIXTAXONOMY {
     """
     #!/usr/bin/env Rscript
     library(phyloseq)
+    library(dplyr)
 
     ## Open data
     phylo <- readRDS('$phyloseq')
@@ -69,7 +70,20 @@ process PHYLOSEQ_FIXTAXONOMY {
                     ifelse(!is.na(tax\$Phylum) & is.na(tax\$Class), paste(tax\$Phylum, 'spp.'),
                     ifelse(!is.na(tax\$Kingdom) & is.na(tax\$Phylum), paste(tax\$Kingdom, 'spp.'),
                     ifelse(is.na(tax\$Kingdom), 'unclassified', NA))))))))
+
     tax\$ASV <- rownames(tax)
+
+
+    # dplyr version isn't taht better, but I will leave it here.
+    # taxrownames <- rownames(tax)
+    #   df <- df %>%
+    #rowwise() %>%
+    #mutate(
+    #  across(everything(), ~ if (is.na(Kingdom)) "unclassified" else .),
+    #  across(Phylum:Species, ~ ifelse(is.na(.), paste0(coalesce(Genus, Family, Order, Class, Phylum, ""), " spp."), .))
+    #) %>%
+    #ungroup()
+    # rownames(taxrownames) <- taxrownames
 
     saveRDS(tax, file = "taxtable_${postfix}.RDS")
     """

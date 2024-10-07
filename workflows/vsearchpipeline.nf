@@ -54,6 +54,7 @@ include { PHYLOSEQ_MAKEOBJECT as PHYLOSEQ_COMPLETE_MAKEOBJECT }     from '../mod
 include { PHYLOSEQ_FIXTAXONOMY as PHYLOSEQ_COMPLETE_FIXTAX }        from '../modules/local/phyloseq/fixtaxonomy'
 include { PHYLOSEQ_METRICS as PHYLOSEQ_COMPLETE_METRICS }           from '../modules/local/phyloseq/metrics'
 include { PHYLOSEQ_ALPHA_METRICS }                                  from '../modules/local/phyloseq/alpha_metrics'
+include { PHYLOSEQ_BETA_METRICS }                                   from '../modules/local/phyloseq/beta_metrics'
 include { PHYLOSEQ_RAREFACTION as PHYLOSEQ_RAREFIED }               from '../modules/local/phyloseq/rarefaction'
 include { PHYLOSEQ_METRICS as PHYLOSEQ_RAREFIED_METRICS }           from '../modules/local/phyloseq/metrics'
 include { PHYLOSEQ_FIXTAXONOMY as PHYLOSEQ_RAREFIED_FIXTAX }        from '../modules/local/phyloseq/fixtaxonomy'
@@ -274,13 +275,13 @@ workflow VSEARCHPIPELINE {
         EXTRACT_METADATA.out.metatable
     )
 
-
     ch_phyloseq = PHYLOSEQ_COMPLETE_MAKEOBJECT.out.phyloseq
     ch_versions = ch_versions.mix(PHYLOSEQ_COMPLETE_MAKEOBJECT.out.versions)
     ch_taxtable = PHYLOSEQ_COMPLETE_MAKEOBJECT.out.taxtable
     ch_complete = true
 
     PHYLOSEQ_ALPHA_METRICS( ch_phyloseq )
+    PHYLOSEQ_BETA_METRICS( ch_phyloseq )
 
     //
     // MODULE: Fix taxonomy

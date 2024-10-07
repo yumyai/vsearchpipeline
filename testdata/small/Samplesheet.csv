@@ -1,3 +1,5 @@
-sample, fastq_1, fastq_2
-sampleID_1,testdata/small/S1_R1.fastq.gz,testdata/small/S1_R2.fastq.gz
-sampleID_2,testdata/small/S2_R1.fastq.gz,testdata/small/S2_R2.fastq.gz
+sample, fastq_1, fastq_2, Day
+S1_D00,testdata/small/S1-V0D00_R1.fastq.gz,testdata/small/S1-V0D00_R2.fastq.gz,D00
+S1_D35,testdata/small/S1-V5D35_R1.fastq.gz,testdata/small/S1-V5D35_R2.fastq.gz,D35
+S2_D00,testdata/small/S2-V0D00_R1.fastq.gz,testdata/small/S2-V0D00_R2.fastq.gz,D00
+S2_D35,testdata/small/S2-V5D35_R1.fastq.gz,testdata/small/S2-V5D35_R2.fastq.gz,D35

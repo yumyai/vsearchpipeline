@@ -34,7 +34,7 @@ process PHYLOSEQ_ALPHA_METRICS {
     ## Diversity metrics
     dir.create("alpha")
 
-    calc <- function(.ps) {
+    calc_alpha <- function(.ps) {
       .ps %>%
         microbiome::alpha(index = "all") %>%
 	as_tibble(rownames = "ID_sample") %>%
@@ -43,17 +43,17 @@ process PHYLOSEQ_ALPHA_METRICS {
     }
 
     phy %>%
-      calc() %>%
+      calc_alpha() %>%
       write_tsv("alpha_metrics_otu.txt")
 
     phy %>%
       aggregate_taxa("Species") %>%
-      calc %>%
+      calc_alpha %>%
       write_tsv("alpha_metrics_sp.txt")
 
     phy %>%
       aggregate_taxa("Genus") %>%
-      calc %>%
+      calc_alpha %>%
       write_tsv("alpha_metrics_gen.txt")
 
     """

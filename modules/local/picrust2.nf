@@ -1,5 +1,5 @@
 process PICRUST2 {
-    label 'process_high'
+    label 'process_mem_med'
     label 'picrust2'
 
     input:

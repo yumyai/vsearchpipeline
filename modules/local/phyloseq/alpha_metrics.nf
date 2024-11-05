@@ -6,9 +6,10 @@ process PHYLOSEQ_ALPHA_METRICS {
     path    phyloseq
 
     output:
-    path "alpha_metrics_otu.txt"  , emit: alpha_metrics_otu
-    path "alpha_metrics_sp.txt"   , emit: alpha_metrics_sp
-    path "alpha_metrics_gen.txt"  , emit: alpha_metrics_gen
+    path "alpha_metrics_otu.tsv"  , emit: alpha_metrics_otu
+    path "alpha_metrics_sp.tsv"   , emit: alpha_metrics_sp
+    path "alpha_metrics_gen.tsv"  , emit: alpha_metrics_gen
+    path "alpha_metrics_fam.tsv"  , emit: alpha_metrics_fam
 
     when:
     task.ext.when == null || task.ext.when
@@ -38,23 +39,27 @@ process PHYLOSEQ_ALPHA_METRICS {
       .ps %>%
         microbiome::alpha(index = "all") %>%
 	as_tibble(rownames = "ID_sample") %>%
-	mutate(Simpson = -(diversity_gini_simpson - 1)) %>%
-	dplyr::select(ID_sample, Chao1 = chao1, Simpson, Shannon = diversity_shannon)
+	mutate(Simpson = -(diversity_gini_simpson - 1))
     }
 
     phy %>%
       calc_alpha() %>%
-      write_tsv("alpha_metrics_otu.txt")
+      write_tsv("alpha_metrics_otu.tsv")
 
     phy %>%
       aggregate_taxa("Species") %>%
       calc_alpha %>%
-      write_tsv("alpha_metrics_sp.txt")
+      write_tsv("alpha_metrics_sp.tsv")
 
     phy %>%
       aggregate_taxa("Genus") %>%
       calc_alpha %>%
-      write_tsv("alpha_metrics_gen.txt")
+      write_tsv("alpha_metrics_gen.tsv")
+
+    phy %>%
+      aggregate_taxa("Family") %>%
+      calc_alpha %>%
+      write_tsv("alpha_metrics_fam.tsv")
 
     """
     
@@ -62,8 +67,9 @@ process PHYLOSEQ_ALPHA_METRICS {
     def args = task.ext.args ?: ''
 
     """
-    touch alpha_metrics_otu.txt
-    touch alpha_metrics_sp.txt
-    touch alpha_metrics_gen.txt
+    touch alpha_metrics_otu.tsv
+    touch alpha_metrics_sp.tsv
+    touch alpha_metrics_gen.tsv
+    touch alpha_metrics_fam.tsv
     """
 }
